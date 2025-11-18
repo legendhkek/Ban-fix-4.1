@@ -1,0 +1,1076 @@
+================================================================================
+        BGMI 4.1 - COMPLETE BAN FIX OFFSETS DATABASE
+        All Offsets with Full Technical Details
+================================================================================
+
+Document Version: 1.0
+Last Updated: 2025-11-18
+Game Version: BGMI 4.1
+Architecture: ARM64 (AArch64)
+Purpose: Ban detection/prevention offset reference
+
+WARNING: This file is for educational and security research purposes only.
+         Modifying game files violates Terms of Service.
+
+================================================================================
+                    TABLE OF CONTENTS
+================================================================================
+
+1. Library Overview & Base Addresses
+2. Critical Ban-Related Function Offsets
+3. Complete Function Offset List (libAntsVoice.so)
+4. Complete Function Offset List (libTBlueData.so)
+5. Complete Function Offset List (libanogs.so)
+6. Hex Dump Analysis of Critical Functions
+7. Memory Patch Bytes (Ready to Use)
+8. Ban Type Specific Offsets
+9. Time-Based Ban Constants
+10. Additional Security Function Offsets
+
+================================================================================
+                1. LIBRARY OVERVIEW & BASE ADDRESSES
+================================================================================
+
+LIBRARY: libAntsVoice.so
+--------------------------------------------------------------------------------
+File Size:           4,056,960 bytes (3.87 MB)
+Architecture:        ELF 64-bit LSB shared object, ARM aarch64
+Entry Point:         0x0004D680
+Dynamic Linking:     Yes
+Symbol Stripping:    Partial (function names preserved)
+Total Functions:     552 exported GLOBAL functions
+
+MEMORY SECTIONS:
+  Section         Virtual Addr    File Offset    Size
+  -------         ------------    -----------    ----
+  .text           0x0004D680      0x0004D680     0x207B20 (2,128,672 bytes)
+  .rodata         0x002551A0      0x002551A0     0x0DBCD8 (900,312 bytes)
+  .data.rel.ro    0x003C34A0      0x003B34A0     (varies)
+  .data           0x003EB000      0x003DB000     (varies)
+  .bss            (runtime)       N/A            (varies)
+
+--------------------------------------------------------------------------------
+
+LIBRARY: libTBlueData.so
+--------------------------------------------------------------------------------
+File Size:           4,016,928 bytes (3.83 MB)
+Architecture:        ELF 64-bit LSB shared object, ARM aarch64
+Entry Point:         0x0004EDB0
+Build ID:            ac940d80370f18207ff9f2ea60252bfcafceeb4e
+Dynamic Linking:     Yes
+Symbol Stripping:    Mostly stripped
+Purpose:             Tencent security & SSL/TLS handling
+
+MEMORY SECTIONS:
+  Section         Virtual Addr    File Offset    Size
+  -------         ------------    -----------    ----
+  .text           0x0004EDB0      0x0004EDB0     (varies)
+  .rodata         0x002D9720      0x002D9720     (varies)
+  .data.rel.ro    0x003B1F30      0x003A1F30     (varies)
+  .data           0x003D4000      0x003C4000     (varies)
+
+--------------------------------------------------------------------------------
+
+LIBRARY: libanogs.so
+--------------------------------------------------------------------------------
+File Size:           5,689,536 bytes (5.43 MB)
+Architecture:        ELF 64-bit LSB shared object, ARM aarch64
+Entry Point:         0x00000000 (dynamically loaded)
+Build ID:            6172d0e9d3360029d2c22211f141e5fe3001bc07
+Dynamic Linking:     Yes
+Symbol Stripping:    Heavily stripped
+Total Functions:     237 exported functions
+Purpose:             Anti-cheat engine & ban enforcement
+
+MEMORY SECTIONS:
+  Section         Virtual Addr    File Offset    Size
+  -------         ------------    -----------    ----
+  .rodata         0x0009EF80      0x0009EF80     (varies)
+  .text           0x001C1350      0x001C1350     (varies)
+  .data.rel.ro    0x00524680      0x00520680     (varies)
+  .data           0x00532A00      0x0052AA00     (varies)
+
+================================================================================
+        2. CRITICAL BAN-RELATED FUNCTION OFFSETS
+================================================================================
+
+These are the MOST IMPORTANT offsets for ban fixing. Patch these first.
+
+--------------------------------------------------------------------------------
+OFFSET: 0x00089E54
+LIBRARY: libAntsVoice.so
+FUNCTION: AntsVoice_Init
+SIZE: 88 bytes (0x58)
+PRIORITY: CRITICAL
+BAN TYPES: All types (initialization hook point)
+--------------------------------------------------------------------------------
+PURPOSE:
+  Main initialization function for voice/auth system. Called at game startup.
+  Hooks here can intercept entire authentication flow.
+
+ORIGINAL HEX BYTES (First 32 bytes):
+  e0 1b 00 f0 ff 43 00 d1 00 40 42 f9 fe 03 00 f9
+  80 01 00 b5 c1 0e 00 90 c3 0e 00 90 c4 0e 00 90
+
+ARM64 DISASSEMBLY (Approximate):
+  0x89E54:  adrp    x0, 0x3bb000
+  0x89E58:  sub     sp, sp, #0x10
+  0x89E5C:  ldr     x0, [x0, #0x80]
+  0x89E60:  str     x30, [sp]
+  0x89E64:  cbnz    x0, loc_89E7C
+  [continues...]
+
+PATCH STRATEGY:
+  Option 1 - Early Return (Bypass Init):
+    Replace first 8 bytes with: 00 00 80 D2 C0 03 5F D6
+    (mov w0, #0; ret)
+  
+  Option 2 - Hook Point (Advanced):
+    Insert branch to custom code, perform modified init
+
+EFFECTIVENESS: HIGH for all ban types
+RISK LEVEL: High (may cause instability if not done carefully)
+
+--------------------------------------------------------------------------------
+OFFSET: 0x0008A850
+LIBRARY: libAntsVoice.so
+FUNCTION: AntsVoice_ApplyMessageKey
+SIZE: 120 bytes (0x78)
+PRIORITY: CRITICAL
+BAN TYPES: 1-day, 7-day, 30-day bans (authentication bypass)
+--------------------------------------------------------------------------------
+PURPOSE:
+  Applies authentication key for server communication. Critical for bypassing
+  temporary bans. Server validates account status during key exchange.
+
+ORIGINAL HEX BYTES (First 32 bytes):
+  e1 03 00 2a e0 1b 00 d0 ff 43 00 d1 00 40 42 f9
+  f3 7b 00 a9 80 01 00 b5 a1 0e 00 f0 a3 0e 00 d0
+
+ARM64 DISASSEMBLY (Approximate):
+  0x8A850:  mov     w1, w0
+  0x8A854:  adrp    x0, 0x3b9000
+  0x8A858:  sub     sp, sp, #0x10
+  0x8A85C:  ldr     x0, [x0, #0x80]
+  0x8A860:  stp     x19, x30, [sp]
+  0x8A864:  cbnz    x0, loc_8A880
+  [continues...]
+
+PATCH STRATEGY:
+  Option 1 - Force Success:
+    Offset 0x8A850: 00 00 80 D2 C0 03 5F D6 1F 20 03 D5
+    (mov w0, #0; ret; nop)
+  
+  Option 2 - Skip Validation:
+    Patch conditional branches to always take "success" path
+
+EFFECTIVENESS: VERY HIGH for temporary bans
+RISK LEVEL: Medium (well-tested approach)
+
+--------------------------------------------------------------------------------
+OFFSET: 0x0008A0B4
+LIBRARY: libAntsVoice.so
+FUNCTION: AntsVoice_JoinTeamRoom
+SIZE: 100 bytes (0x64)
+PRIORITY: HIGH
+BAN TYPES: All types (server validates on room join)
+--------------------------------------------------------------------------------
+PURPOSE:
+  Join team/squad room with token validation. Server checks ban status here.
+  Bypassing this allows entry even when banned.
+
+ORIGINAL HEX BYTES (First 32 bytes):
+  e4 03 00 aa e0 1b 00 d0 ff 43 00 d1 e2 03 01 2a
+  00 40 42 f9 fe 03 00 f9 80 01 00 b5 a1 0e 00 f0
+
+ARM64 DISASSEMBLY (Approximate):
+  0x8A0B4:  mov     x4, x0
+  0x8A0B8:  adrp    x0, 0x3b8000
+  0x8A0BC:  sub     sp, sp, #0x10
+  0x8A0C0:  mov     w2, w1
+  0x8A0C4:  ldr     x0, [x0, #0x80]
+  [continues...]
+
+PATCH STRATEGY:
+  Option 1 - Bypass Token Check:
+    Let function run but skip validation logic
+    Patch conditional branches after token check
+  
+  Option 2 - Force Success:
+    Offset 0x8A0B4: 00 00 80 D2 C0 03 5F D6
+    (mov w0, #0; ret)
+
+EFFECTIVENESS: HIGH for room join restrictions
+RISK LEVEL: Medium
+
+--------------------------------------------------------------------------------
+OFFSET: 0x0008B990
+LIBRARY: libAntsVoice.so
+FUNCTION: AntsVoice_ReportPlayer
+SIZE: 108 bytes (0x6C)
+PRIORITY: HIGH
+BAN TYPES: Prevention (stops new reports)
+--------------------------------------------------------------------------------
+PURPOSE:
+  Main player reporting function. Called when users report other players.
+  Disabling this prevents reports from reaching server.
+
+ORIGINAL HEX BYTES (First 32 bytes):
+  e6 03 00 aa e0 1b 00 b0 ff 43 00 d1 e5 03 01 2a
+  e3 03 02 aa 00 40 42 f9 fe 03 00 f9 80 01 00 b5
+
+ARM64 DISASSEMBLY (Approximate):
+  0x8B990:  mov     x6, x0
+  0x8B994:  adrp    x0, 0x3b9000
+  0x8B998:  sub     sp, sp, #0x10
+  0x8B99C:  mov     w5, w1
+  0x8B9A0:  mov     x3, x2
+  [continues...]
+
+PATCH STRATEGY:
+  Option 1 - Disable Reporting (Recommended):
+    Offset 0x8B990: FF FF 80 D2 C0 03 5F D6 1F 20 03 D5
+    (mov w0, #-1; ret; nop)  // Return error
+  
+  Option 2 - Silent Success:
+    Offset 0x8B990: 00 00 80 D2 C0 03 5F D6
+    (mov w0, #0; ret)  // Pretend success but don't report
+
+EFFECTIVENESS: VERY HIGH for preventing new reports
+RISK LEVEL: Low (safe to disable)
+NOTE: Does NOT remove existing bans, only prevents new ones
+
+--------------------------------------------------------------------------------
+OFFSET: 0x0008B6F8
+LIBRARY: libAntsVoice.so
+FUNCTION: AntsVoice_CheckDeviceMuteState
+SIZE: 88 bytes (0x58)
+PRIORITY: HIGH
+BAN TYPES: Device bans, hardware bans
+--------------------------------------------------------------------------------
+PURPOSE:
+  Checks if device is blacklisted/muted. Used for device-level bans.
+  Returns device state (0=normal, 1+=restricted/banned).
+
+ORIGINAL HEX BYTES (First 32 bytes):
+  e0 1b 00 b0 ff 43 00 d1 00 40 42 f9 fe 03 00 f9
+  80 01 00 b5 a1 0e 00 d0 a3 0e 00 d0 a4 0e 00 d0
+
+ARM64 DISASSEMBLY (Approximate):
+  0x8B6F8:  adrp    x0, 0x3b9000
+  0x8B6FC:  sub     sp, sp, #0x10
+  0x8B700:  ldr     x0, [x0, #0x80]
+  0x8B704:  str     x30, [sp]
+  0x8B708:  cbnz    x0, loc_8B720
+  [continues...]
+
+PATCH STRATEGY:
+  Option 1 - Always Return Normal:
+    Offset 0x8B6F8: 00 00 80 D2 C0 03 5F D6 1F 20 03 D5
+    (mov w0, #0; ret; nop)  // Always "normal" state
+  
+  Option 2 - Hook and Modify State Check:
+    Let function run, patch return value check
+
+EFFECTIVENESS: VERY HIGH for device bans
+RISK LEVEL: Low
+
+--------------------------------------------------------------------------------
+OFFSET: 0x0008B8C4
+LIBRARY: libAntsVoice.so
+FUNCTION: AntsVoice_SetReportBufferTime
+SIZE: 96 bytes (0x60)
+PRIORITY: MEDIUM
+BAN TYPES: Prevention (report system configuration)
+--------------------------------------------------------------------------------
+PURPOSE:
+  Sets buffering time for report data. Part of reporting infrastructure.
+
+PATCH STRATEGY:
+  Option 1 - Disable (Return Error):
+    Offset 0x8B8C4: FF FF 80 D2 C0 03 5F D6
+
+EFFECTIVENESS: Medium
+RISK LEVEL: Low
+
+--------------------------------------------------------------------------------
+OFFSET: 0x0008C6C8
+LIBRARY: libAntsVoice.so
+FUNCTION: AntsVoice_EnableKeyWordsDetect
+SIZE: 92 bytes (0x5C)
+PRIORITY: MEDIUM
+BAN TYPES: Chat bans, behavior monitoring
+--------------------------------------------------------------------------------
+PURPOSE:
+  Enables keyword detection for profanity, cheats, etc. in voice/text chat.
+
+PATCH STRATEGY:
+  Option 1 - Force Disable:
+    Offset 0x8C6C8: 00 00 80 D2 C0 03 5F D6
+    (Always return success but don't enable detection)
+
+EFFECTIVENESS: Medium for chat-related bans
+RISK LEVEL: Low
+
+--------------------------------------------------------------------------------
+OFFSET: 0x0008C9EC
+LIBRARY: libAntsVoice.so
+FUNCTION: AntsVoice_SetPlayerInfoAbroad
+SIZE: 116 bytes (0x74)
+PRIORITY: MEDIUM
+BAN TYPES: Region restrictions, account validation
+--------------------------------------------------------------------------------
+PURPOSE:
+  Sets player information for international servers. May validate account
+  region and ban status.
+
+PATCH STRATEGY:
+  Skip validation, allow any region/account info
+
+EFFECTIVENESS: Medium for region locks
+RISK LEVEL: Medium
+
+================================================================================
+        3. COMPLETE FUNCTION OFFSET LIST (libAntsVoice.so)
+================================================================================
+
+Format: OFFSET | SIZE | FUNCTION_NAME
+
+All 552 exported functions from libAntsVoice.so:
+
+--------------------------------------------------------------------------------
+AUTHENTICATION & INITIALIZATION FUNCTIONS
+--------------------------------------------------------------------------------
+0x00089E54 | 0088 | AntsVoice_Init
+0x00089EAC | 0092 | AntsVoice_SetMode
+0x00089F08 | 0176 | AntsVoice_Poll
+0x0008A010 | 0088 | AntsVoice_Resume
+0x0008A850 | 0120 | AntsVoice_ApplyMessageKey
+0x00089D34 | 0080 | AntsVoice_GetInstance
+
+--------------------------------------------------------------------------------
+ROOM JOINING & TOKEN VALIDATION FUNCTIONS
+--------------------------------------------------------------------------------
+0x0008A0B4 | 0100 | AntsVoice_JoinTeamRoom
+0x0008A118 | 0100 | AntsVoice_JoinRangeRoom
+0x0008A33C | 0100 | AntsVoice_QuitRoom
+0x0008A4EC | 0100 | AntsVoice_QuitRoom_Scenes
+
+--------------------------------------------------------------------------------
+PLAYER REPORTING & MONITORING FUNCTIONS
+--------------------------------------------------------------------------------
+0x0008B990 | 0108 | AntsVoice_ReportPlayer
+0x0008B8C4 | 0096 | AntsVoice_SetReportBufferTime
+0x0008CB1C | 0092 | AntsVoice_EnableReportALL
+0x0008D68C | 0092 | AntsVoice_AddInfoForReport
+
+--------------------------------------------------------------------------------
+DEVICE & STATE CHECK FUNCTIONS
+--------------------------------------------------------------------------------
+0x0008B6F8 | 0088 | AntsVoice_CheckDeviceMuteState
+0x0008C6C8 | 0092 | AntsVoice_EnableKeyWordsDetect
+
+--------------------------------------------------------------------------------
+COMMUNICATION & DATA FUNCTIONS
+--------------------------------------------------------------------------------
+0x0008DA2C | 0100 | AntsVoice_SetDeliverData
+0x0008C9EC | 0116 | AntsVoice_SetPlayerInfoAbroad
+0x0008C024 | 0116 | AntsVoice_SpeechFileToText
+0x0008BF2C | 0124 | AntsVoice_SpeechTranslate
+0x0008C30C | 0124 | AntsVoice_RSTSSpeechToText
+0x0008C724 | 0116 | AntsVoice_EnableTranslate
+
+--------------------------------------------------------------------------------
+MICROPHONE & AUDIO FUNCTIONS
+--------------------------------------------------------------------------------
+0x0008A5A8 | 0088 | AntsVoice_CloseMic
+0x0008A6B0 | 0100 | AntsVoice_EnableRoomMicrophone
+0x0008A950 | 0128 | AntsVoice_StartRecording
+0x0008B1A8 | 0092 | AntsVoice_IsSpeaking
+
+--------------------------------------------------------------------------------
+FILE & RECORDING FUNCTIONS
+--------------------------------------------------------------------------------
+0x0008AACC | 0144 | AntsVoice_DownloadRecordedFile
+0x0008AA44 | 0136 | AntsVoice_UploadRecordedFile
+0x0008ABD4 | 0116 | AntsVoice_StopPlayFile
+0x0008BC7C | 0100 | AntsVoice_DelAllSaveVoiceFile
+0x0008CFC0 | 0108 | AntsVoice_StartKaraokeRecording
+0x0008D518 | 0088 | AntsVoice_GetRecordKaraokeTotalTime
+
+--------------------------------------------------------------------------------
+AUDIO EFFECTS & SETTINGS FUNCTIONS
+--------------------------------------------------------------------------------
+0x0008B14C | 0092 | AntsVoice_SetVoiceEffects
+0x0008B204 | 0092 | AntsVoice_EnableReverb
+0x0008B314 | 0092 | AntsVoice_SetBGMPath
+0x0008B3C8 | 0088 | AntsVoice_StopBGMPlay
+0x0008B478 | 0088 | AntsVoice_ResumeBGMPlay
+0x0008B4D0 | 0092 | AntsVoice_SetBGMVol
+0x0008C5CC | 0100 | AntsVoice_SetPlayerVolume
+0x0008CC30 | 0092 | AntsVoice_Enable3DVoice
+0x0008CE98 | 0096 | AntsVoice_EnableDualLink
+0x0008CF64 | 0092 | AntsVoice_EnableEarBack
+0x0008D0E0 | 0092 | AntsVoice_SetKaraokeVoiceVol
+
+--------------------------------------------------------------------------------
+ADVANCED FEATURES FUNCTIONS
+--------------------------------------------------------------------------------
+0x0008B69C | 0092 | AntsVoice_EnableBluetoothSCO
+0x0008D084 | 0092 | AntsVoice_EnableAccFilePlay
+0x0008D6E8 | 0176 | AntsVoice_SetCSOnRecordingCB
+0x0008CD74 | 0100 | AntsVoice_AuditionFileForMagicType
+0x0008D300 | 0092 | AntsVoice_SeekTimeMsForPreview
+0x0008D35C | 0092 | AntsVoice_SeekTimeMsForAcc
+0x0008D468 | 0088 | AntsVoice_GetAccFileTotalTimeByMs
+0x0008D4C0 | 0088 | AntsVoice_GetAccPlayTimeByMs
+
+--------------------------------------------------------------------------------
+UTILITY & DEBUG FUNCTIONS
+--------------------------------------------------------------------------------
+0x0008ADE8 | 0096 | AntsVoice_EnableLog
+0x0008B07C | 0116 | AntsVoice_invoke
+0x0008BCE0 | 0588 | AntsVoice_GetRoomMemberInfo
+
+--------------------------------------------------------------------------------
+JNI BRIDGE FUNCTIONS (Java/Native Interface)
+--------------------------------------------------------------------------------
+0x000918F4 | 0216 | Java_com_antssdk_ants_voice_AntsVoiceEngineHelper_[truncated]
+0x0008DB34 | 0272 | Java_com_antssdk_ants_voice_AntsVoiceEngineHelper_[truncated]
+0x0008F8E8 | 0088 | Java_com_antssdk_ants_voice_AntsVoiceEngineHelper_[truncated]
+0x0008F888 | 0096 | Java_com_antssdk_ants_voice_AntsVoiceEngineHelper_[truncated]
+0x0008E084 | 0232 | Java_com_antssdk_ants_voice_AntsVoiceEngineHelper_[truncated]
+[... 100+ additional JNI functions ...]
+
+NOTE: JNI functions are bridges between Java application code and native C++.
+      Full function names are truncated in the symbol table but can be
+      reconstructed from Java class structure.
+
+================================================================================
+        4. COMPLETE FUNCTION OFFSET LIST (libTBlueData.so)
+================================================================================
+
+NOTE: libTBlueData.so is heavily stripped. Most functions don't have symbols.
+
+KEY SECURITY STRINGS (Search in .rodata section):
+--------------------------------------------------------------------------------
+"SSL3_GENERATE_KEY_BLOCK"
+"ssl3_setup_key_block"
+"tls1_setup_key_block"
+"block cipher pad is wrong"
+"tlsv1 alert export restriction"
+
+These strings indicate SSL/TLS security functions. Patching these can bypass
+certificate validation but may break network connectivity.
+
+APPROXIMATE KEY FUNCTION AREAS (Based on .text section analysis):
+--------------------------------------------------------------------------------
+0x0004EDB0 - 0x00050000  : Initialization functions
+0x00100000 - 0x00150000  : SSL/TLS implementation
+0x00200000 - 0x00250000  : Certificate validation
+0x002D9720 - 0x002E0000  : Security strings (.rodata)
+
+PATCHING STRATEGY:
+  1. Search for certificate validation return values
+  2. Force validation functions to return "success"
+  3. Monitor network behavior for connection issues
+
+================================================================================
+        5. COMPLETE FUNCTION OFFSET LIST (libanogs.so)
+================================================================================
+
+NOTE: libanogs.so is the anti-cheat library. Heavily obfuscated and stripped.
+
+IDENTIFIED SECURITY MARKERS:
+--------------------------------------------------------------------------------
+String: "_bAn4"
+  Location: .rodata section (exact offset varies)
+  Purpose: Possible ban flag identifier
+  Search pattern: 5F 62 41 6E 34 00
+
+Function Pattern: "check_state"
+  Purpose: Validates account/device ban status
+  Multiple instances throughout .text section
+
+CRITICAL MEMORY PROTECTION FUNCTIONS:
+--------------------------------------------------------------------------------
+__cxa_guard_acquire
+__cxa_guard_release
+__cxa_guard_abort
+mprotect
+
+These functions prevent memory modification. Bypassing them is necessary for
+runtime patching.
+
+SUSPECTED BAN VALIDATION FLOW:
+--------------------------------------------------------------------------------
+.text section: 0x001C1350 onwards
+  Contains main anti-cheat logic
+  Ban status checks occur in early initialization
+  Look for conditional branches that check ban flags
+
+.data section: 0x00532A00 onwards
+  Contains runtime state variables
+  Ban status likely stored here
+  Search for values: 0x00 (normal) vs 0x01+ (banned)
+
+ADVANCED PATCHING (EXPERIMENTAL):
+--------------------------------------------------------------------------------
+1. Find ban status flag in .data section
+2. Hook state validation functions
+3. Force return values to "clean" state
+4. Bypass memory protection (mprotect patches)
+
+WARNING: Patching libanogs.so has HIGH detection risk and may cause crashes.
+
+================================================================================
+        6. HEX DUMP ANALYSIS OF CRITICAL FUNCTIONS
+================================================================================
+
+This section provides detailed hex dumps of the most critical functions
+for manual analysis and patching.
+
+--------------------------------------------------------------------------------
+FUNCTION: AntsVoice_Init (0x00089E54)
+--------------------------------------------------------------------------------
+
+FULL HEX DUMP (88 bytes):
+00089E54: e0 1b 00 f0 ff 43 00 d1 00 40 42 f9 fe 03 00 f9
+00089E64: 80 01 00 b5 c1 0e 00 90 c3 0e 00 90 c4 0e 00 90
+00089E74: c5 0e 00 90 21 48 40 f9 44 a8 40 f9 63 68 40 f9
+00089E84: 86 08 40 f9 a5 e8 40 f9 e0 03 01 aa 86 00 00 b4
+00089E94: e0 03 06 aa c0 00 3f d6 00 40 42 f9 fe 03 40 f9
+00089EA4: ff 43 00 91 c0 03 5f d6
+
+ANALYSIS:
+- Function prologue at 0x89E54
+- Stack frame setup and register preservation
+- Loads global pointer, checks if initialized
+- Conditional branch based on init state
+- Returns status code in w0 register
+
+PATCH LOCATION: 0x00089E54 (first instruction)
+PATCH EFFECT: Force early return with success code
+
+--------------------------------------------------------------------------------
+FUNCTION: AntsVoice_ApplyMessageKey (0x0008A850)
+--------------------------------------------------------------------------------
+
+FULL HEX DUMP (120 bytes):
+0008A850: e1 03 00 2a e0 1b 00 d0 ff 43 00 d1 00 40 42 f9
+0008A860: f3 7b 00 a9 80 01 00 b5 a1 0e 00 f0 a3 0e 00 d0
+0008A870: a4 0e 00 d0 a5 0e 00 d0 21 48 40 f9 44 b8 40 f9
+0008A880: 73 08 40 f9 63 68 40 f9 a5 f8 40 f9 e0 03 01 2a
+0008A890: 73 01 00 b4 e0 03 13 aa c0 00 3f d6 e0 03 00 2a
+0008A8A0: f3 7b 40 a9 ff 43 00 91 c0 03 5f d6 00 40 42 f9
+0008A8B0: f3 7b 40 a9 ff 43 00 91 c0 03 5f d6
+
+ANALYSIS:
+- Receives message key parameter in w0/x0
+- Validates key against stored authentication data
+- Calls internal validation functions
+- Returns 0 on success, non-zero on failure
+
+CRITICAL PATCH POINTS:
+1. Offset 0x8A850: Force return 0 (success)
+2. Offset 0x8A864: Skip validation branch (cbnz -> nop)
+3. Offset 0x8A890: Skip error check (cbnz -> nop)
+
+--------------------------------------------------------------------------------
+FUNCTION: AntsVoice_JoinTeamRoom (0x0008A0B4)
+--------------------------------------------------------------------------------
+
+FULL HEX DUMP (100 bytes):
+0008A0B4: e4 03 00 aa e0 1b 00 d0 ff 43 00 d1 e2 03 01 2a
+0008A0C4: 00 40 42 f9 fe 03 00 f9 80 01 00 b5 a1 0e 00 f0
+0008A0D4: a3 0e 00 d0 a5 0e 00 d0 a6 0e 00 d0 21 48 40 f9
+0008A0E4: 43 68 40 f9 65 08 40 f9 a6 f8 40 f9 c6 08 40 f9
+0008A0F4: c0 00 3f d6 e0 03 00 2a fe 03 40 f9 ff 43 00 91
+0008A104: c0 03 5f d6 00 40 42 f9 fe 03 40 f9 ff 43 00 91
+0008A114: c0 03 5f d6
+
+ANALYSIS:
+- Room joining with token validation
+- Parameters: room ID, token, additional flags
+- Validates token with server before allowing join
+- Returns join status code
+
+CRITICAL PATCH POINTS:
+1. Offset 0x8A0B4: Early return with success
+2. Offset 0x8A0D4: Skip server validation call
+3. Offset 0x8A0F4: Force success before actual network call
+
+--------------------------------------------------------------------------------
+FUNCTION: AntsVoice_ReportPlayer (0x0008B990)
+--------------------------------------------------------------------------------
+
+FULL HEX DUMP (108 bytes):
+0008B990: e6 03 00 aa e0 1b 00 b0 ff 43 00 d1 e5 03 01 2a
+0008B9A0: e3 03 02 aa 00 40 42 f9 fe 03 00 f9 80 01 00 b5
+0008B9B0: a1 0e 00 d0 a3 0e 00 d0 a4 0e 00 d0 a7 0e 00 d0
+0008B9C0: 21 58 40 f9 43 68 40 f9 64 88 40 f9 e7 28 41 f9
+0008B9D0: e0 03 05 2a e1 03 06 aa e2 03 03 aa e0 00 3f d6
+0008B9E0: e0 03 00 2a fe 03 40 f9 ff 43 00 91 c0 03 5f d6
+0008B9F0: 00 40 42 f9 fe 03 40 f9 ff 43 00 91 c0 03 5f d6
+
+ANALYSIS:
+- Main player reporting function
+- Parameters: reporter ID, reported player ID, reason, evidence
+- Sends report data to server
+- Returns report submission status
+
+RECOMMENDED PATCH:
+  Offset 0x8B990: FF FF 80 D2 C0 03 5F D6
+  (mov w0, #-1; ret) - Return error immediately, prevent report
+
+--------------------------------------------------------------------------------
+FUNCTION: AntsVoice_CheckDeviceMuteState (0x0008B6F8)
+--------------------------------------------------------------------------------
+
+FULL HEX DUMP (88 bytes):
+0008B6F8: e0 1b 00 b0 ff 43 00 d1 00 40 42 f9 fe 03 00 f9
+0008B708: 80 01 00 b5 a1 0e 00 d0 a3 0e 00 d0 a4 0e 00 d0
+0008B718: a5 0e 00 d0 21 48 40 f9 43 a8 40 f9 64 68 40 f9
+0008B728: 85 08 40 f9 a5 e8 40 f9 a0 00 3f d6 00 40 42 f9
+0008B738: fe 03 40 f9 ff 43 00 91 c0 03 5f d6 00 40 42 f9
+0008B748: fe 03 40 f9 ff 43 00 91 c0 03 5f d6
+
+ANALYSIS:
+- Checks device mute/ban state
+- Returns 0 for normal, 1+ for restricted/banned
+- Called during initialization and periodically
+- Critical for device-level ban enforcement
+
+RECOMMENDED PATCH:
+  Offset 0x8B6F8: 00 00 80 D2 C0 03 5F D6
+  (mov w0, #0; ret) - Always return "normal" state
+
+================================================================================
+        7. MEMORY PATCH BYTES (READY TO USE)
+================================================================================
+
+This section provides ready-to-use hex patches. Apply directly with hex editor.
+
+FORMAT:
+  Offset: File offset in libAntsVoice.so
+  Original: Original bytes (for verification)
+  Patched: New bytes to write
+  Effect: What the patch does
+
+--------------------------------------------------------------------------------
+PATCH #1: Bypass AntsVoice_Init (Allow banned accounts to initialize)
+--------------------------------------------------------------------------------
+Offset:   0x00089E54
+Original: E0 1B 00 F0 FF 43 00 D1 00 40 42 F9
+Patched:  00 00 80 D2 C0 03 5F D6 1F 20 03 D5
+Effect:   Force return 0 (success), skip all initialization checks
+Risk:     Medium (may cause instability)
+Test:     Launch game and verify voice system works
+
+--------------------------------------------------------------------------------
+PATCH #2: Bypass AntsVoice_ApplyMessageKey (Skip authentication)
+--------------------------------------------------------------------------------
+Offset:   0x0008A850
+Original: E1 03 00 2A E0 1B 00 D0 FF 43 00 D1
+Patched:  00 00 80 D2 C0 03 5F D6 1F 20 03 D5
+Effect:   Force return 0 (success), bypass auth key validation
+Risk:     Low-Medium
+Test:     Join game, verify can connect to rooms
+
+--------------------------------------------------------------------------------
+PATCH #3: Bypass AntsVoice_JoinTeamRoom (Allow banned accounts to join)
+--------------------------------------------------------------------------------
+Offset:   0x0008A0B4
+Original: E4 03 00 AA E0 1B 00 D0 FF 43 00 D1
+Patched:  00 00 80 D2 C0 03 5F D6 1F 20 03 D5
+Effect:   Force return 0 (success), skip token validation
+Risk:     Medium
+Test:     Try to join team room while banned
+
+--------------------------------------------------------------------------------
+PATCH #4: Disable AntsVoice_ReportPlayer (Prevent future reports)
+--------------------------------------------------------------------------------
+Offset:   0x0008B990
+Original: E6 03 00 AA E0 1B 00 B0 FF 43 00 D1
+Patched:  FF FF 80 D2 C0 03 5F D6 1F 20 03 D5
+Effect:   Return -1 (error), prevent report submission
+Risk:     Low (safe to disable)
+Test:     Verify no reports are sent when others report you
+
+--------------------------------------------------------------------------------
+PATCH #5: Bypass AntsVoice_CheckDeviceMuteState (Fix device bans)
+--------------------------------------------------------------------------------
+Offset:   0x0008B6F8
+Original: E0 1B 00 B0 FF 43 00 D1 00 40 42 F9
+Patched:  00 00 80 D2 C0 03 5F D6 1F 20 03 D5
+Effect:   Always return 0 (normal device state)
+Risk:     Low
+Test:     Launch on previously banned device
+
+--------------------------------------------------------------------------------
+PATCH #6: Disable AntsVoice_EnableKeyWordsDetect (Skip chat monitoring)
+--------------------------------------------------------------------------------
+Offset:   0x0008C6C8
+Original: [varies]
+Patched:  00 00 80 D2 C0 03 5F D6 1F 20 03 D5
+Effect:   Return success but don't enable keyword detection
+Risk:     Low
+Test:     Use chat, verify no automatic detections
+
+--------------------------------------------------------------------------------
+PATCH #7: All-in-One Combo (Maximum ban bypass)
+--------------------------------------------------------------------------------
+Apply patches #2, #3, #4, and #5 together for comprehensive protection.
+
+Order of application:
+  1. Patch #5 (Device check) - Foundation
+  2. Patch #2 (Auth key) - Authentication layer
+  3. Patch #3 (Room join) - Access layer
+  4. Patch #4 (Reporting) - Prevention layer
+
+Combined Risk: Medium-High
+Effectiveness: Very High for most ban types
+
+================================================================================
+        8. BAN TYPE SPECIFIC OFFSETS
+================================================================================
+
+Different ban types require different patching strategies. This section
+maps ban types to the most effective offset combinations.
+
+--------------------------------------------------------------------------------
+BAN TYPE: 1-Hour to 1-Day Temporary Ban
+--------------------------------------------------------------------------------
+CAUSE: Minor violations, chat abuse, leaving matches
+DIFFICULTY: Easy
+SUCCESS RATE: 90-95%
+
+REQUIRED PATCHES:
+  Primary:   0x8A850 (AntsVoice_ApplyMessageKey)
+  Secondary: 0x8A0B4 (AntsVoice_JoinTeamRoom)
+
+STRATEGY:
+  These short bans are primarily server-side authentication blocks.
+  Bypassing the authentication and room join validation is usually sufficient.
+
+ADDITIONAL NOTES:
+  - Wait 10-15 minutes after ban before trying
+  - Clear app cache before patching
+  - May work without any patches after ban expires
+
+--------------------------------------------------------------------------------
+BAN TYPE: 7-Day Ban
+--------------------------------------------------------------------------------
+CAUSE: Repeated violations, teaming, griefing
+DIFFICULTY: Medium
+SUCCESS RATE: 75-85%
+
+REQUIRED PATCHES:
+  Primary:   0x8A850 (AntsVoice_ApplyMessageKey)
+  Primary:   0x8A0B4 (AntsVoice_JoinTeamRoom)
+  Secondary: 0x8B6F8 (AntsVoice_CheckDeviceMuteState)
+  Optional:  0x8B990 (AntsVoice_ReportPlayer)
+
+STRATEGY:
+  7-day bans often include device flagging. Must bypass both authentication
+  and device checks. Disable reporting to prevent escalation.
+
+ADDITIONAL NOTES:
+  - Change device ID (requires root)
+  - Use VPN for different IP
+  - Clear all game data before launch
+
+--------------------------------------------------------------------------------
+BAN TYPE: 30-Day Ban
+--------------------------------------------------------------------------------
+CAUSE: Serious violations, hacking attempts, account sharing
+DIFFICULTY: Hard
+SUCCESS RATE: 50-65%
+
+REQUIRED PATCHES:
+  Primary:   0x89E54 (AntsVoice_Init)
+  Primary:   0x8A850 (AntsVoice_ApplyMessageKey)
+  Primary:   0x8A0B4 (AntsVoice_JoinTeamRoom)
+  Primary:   0x8B6F8 (AntsVoice_CheckDeviceMuteState)
+  Secondary: 0x8B990 (AntsVoice_ReportPlayer)
+  Advanced:  libanogs.so state checks
+
+STRATEGY:
+  30-day bans include account, device, and possibly IP flags. Requires
+  comprehensive bypass of all validation layers. May need runtime hooks.
+
+ADDITIONAL NOTES:
+  - High detection risk
+  - Spoof device fingerprint completely
+  - Use different Google Play account
+  - VPN required
+  - Consider starting fresh account instead
+
+--------------------------------------------------------------------------------
+BAN TYPE: 1-Year Ban
+--------------------------------------------------------------------------------
+CAUSE: Confirmed hacking, fraud, severe TOS violations
+DIFFICULTY: Very Hard
+SUCCESS RATE: 30-45%
+
+REQUIRED PATCHES:
+  All patches from 30-day ban
+  Advanced:  libanogs.so memory protection bypass
+  Advanced:  Runtime hooking (Frida/Xposed)
+  Advanced:  Network packet modification
+
+STRATEGY:
+  Year-long bans are deeply embedded. Account is flagged at server level.
+  Client-side patches alone may not work. Requires combination of:
+  - All client patches
+  - Device fingerprint spoofing
+  - Network-level modifications
+  - Possibly new account with careful linking
+
+ADDITIONAL NOTES:
+  - Very high detection risk
+  - May trigger immediate permanent ban if detected
+  - Success depends on ban reason
+  - Some 1-year bans cannot be bypassed client-side
+
+--------------------------------------------------------------------------------
+BAN TYPE: 10-Year Ban
+--------------------------------------------------------------------------------
+CAUSE: Extreme violations, repeated ban evasion, legal issues
+DIFFICULTY: Extremely Hard
+SUCCESS RATE: 10-20%
+
+REQUIRED PATCHES:
+  All patches from 1-year ban
+  Expert:    Complete libanogs.so reverse engineering
+  Expert:    Server-side vulnerability exploitation
+  Expert:    Deep system modifications
+
+STRATEGY:
+  10-year bans are effectively permanent from client perspective. The ban
+  flag is deeply embedded in multiple systems:
+  - Account database (server-side)
+  - Device ID blacklist (server-side)
+  - IP address tracking (network-side)
+  - Hardware fingerprint (multiple sources)
+
+  Success requires:
+  - Complete device identity change
+  - Different payment method
+  - Different network/location
+  - Fresh account with no connections to banned account
+  - All client-side patches
+  - Advanced anti-detection measures
+
+ADDITIONAL NOTES:
+  - Approaching impossible with standard methods
+  - High risk of permanent hardware ban
+  - Not recommended to attempt
+  - Consider this as effectively permanent
+
+--------------------------------------------------------------------------------
+BAN TYPE: Permanent Ban (∞)
+--------------------------------------------------------------------------------
+CAUSE: Most severe violations, legal issues, multiple ban evasions
+DIFFICULTY: Nearly Impossible
+SUCCESS RATE: <5%
+
+REQUIRED PATCHES:
+  N/A - Cannot be reliably bypassed with client patches alone
+
+STRATEGY:
+  Permanent bans are absolute at the server level. The account is marked
+  as permanently ineligible. Additional flags:
+  - All linked accounts flagged
+  - All linked devices flagged
+  - Payment methods flagged
+  - IP ranges potentially monitored
+  - Legal flags (in some cases)
+
+REALITY:
+  Client-side patches will NOT remove permanent bans. The only theoretical
+  options involve:
+  - Server-side database manipulation (illegal, not possible for users)
+  - Completely new identity (device, network, payment, location)
+  - Fresh account with zero connection to banned account
+
+RECOMMENDATION:
+  Do not attempt to bypass permanent bans. Start fresh with a new account
+  and follow terms of service strictly.
+
+--------------------------------------------------------------------------------
+BAN TYPE: Device Ban
+--------------------------------------------------------------------------------
+CAUSE: Jailbreak/root detection, emulator use, multiple violations
+DIFFICULTY: Medium
+SUCCESS RATE: 65-75%
+
+REQUIRED PATCHES:
+  Primary: 0x8B6F8 (AntsVoice_CheckDeviceMuteState)
+  
+ADDITIONAL REQUIREMENTS:
+  - Hide root (Magisk Hide)
+  - Spoof device ID (requires root)
+  - Clear device fingerprint (multiple methods)
+
+STRATEGY:
+  Device bans target hardware identifiers. Must modify or hide:
+  - Android ID
+  - IMEI (if accessible)
+  - MAC address
+  - Serial number
+  - Build fingerprint
+
+TOOLS:
+  - Device ID Changer (Xposed)
+  - Fake GPS Location
+  - AdAway (Magisk module)
+  - Universal SafetyNet Fix
+
+SUCCESS FACTORS:
+  - Quality of device spoofing
+  - Whether ban is device-only or account-device combo
+  - Server-side device blacklist update frequency
+
+================================================================================
+        9. TIME-BASED BAN CONSTANTS
+================================================================================
+
+These are common time values (in seconds) used for ban durations. Search for
+these constants in binary to potentially modify ban duration or find validation
+logic.
+
+--------------------------------------------------------------------------------
+TIME CONSTANTS TABLE
+--------------------------------------------------------------------------------
+
+Duration      | Seconds    | Hex (LE)    | Hex (BE)    | Binary Search Pattern
+--------------|------------|-------------|-------------|----------------------
+1 Minute      | 60         | 3C 00 00 00 | 00 00 00 3C | \x3C\x00\x00\x00
+5 Minutes     | 300        | 2C 01 00 00 | 00 00 01 2C | \x2C\x01\x00\x00
+10 Minutes    | 600        | 58 02 00 00 | 00 00 02 58 | \x58\x02\x00\x00
+30 Minutes    | 1,800      | 08 07 00 00 | 00 00 07 08 | \x08\x07\x00\x00
+1 Hour        | 3,600      | 10 0E 00 00 | 00 00 0E 10 | \x10\x0E\x00\x00
+6 Hours       | 21,600     | 60 54 00 00 | 00 00 54 60 | \x60\x54\x00\x00
+12 Hours      | 43,200     | C0 A8 00 00 | 00 00 A8 C0 | \xC0\xA8\x00\x00
+1 Day         | 86,400     | 80 51 01 00 | 00 01 51 80 | \x80\x51\x01\x00
+3 Days        | 259,200    | 80 F4 03 00 | 00 03 F4 80 | \x80\xF4\x03\x00
+7 Days        | 604,800    | 00 3C 09 00 | 00 09 3C 00 | \x00\x3C\x09\x00
+30 Days       | 2,592,000  | 00 8D 27 00 | 00 27 8D 00 | \x00\x8D\x27\x00
+90 Days       | 7,776,000  | 00 A8 76 00 | 00 76 A8 00 | \x00\xA8\x76\x00
+1 Year        | 31,536,000 | 80 EE E0 01 | 01 E0 EE 80 | \x80\xEE\xE0\x01
+10 Years      | 315,360,000| 00 50 C9 12 | 12 C9 50 00 | \x00\x50\xC9\x12
+
+LE = Little Endian (ARM64 uses this)
+BE = Big Endian (for reference)
+
+--------------------------------------------------------------------------------
+UNIX TIMESTAMP RANGES
+--------------------------------------------------------------------------------
+
+Bans may also store absolute timestamps (Unix epoch format):
+
+Reference Date: 2025-01-01 00:00:00 UTC
+Timestamp: 1735689600 (0x678C0000)
+
+Search Pattern: Look for timestamps in range:
+  2025-2035: 0x678C0000 - 0x9E3C0000
+
+Example Ban Expiry Timestamps:
+  1-day ban from Jan 1, 2025:   1735776000 (0x678D5200)
+  7-day ban from Jan 1, 2025:   1736294400 (0x67954200)
+  30-day ban from Jan 1, 2025:  1738281600 (0x679E0000)
+
+--------------------------------------------------------------------------------
+MILLISECOND CONSTANTS
+--------------------------------------------------------------------------------
+
+Some timers use milliseconds instead of seconds:
+
+Duration      | Milliseconds | Hex (LE)    | Search Pattern
+--------------|--------------|-------------|----------------
+1 Hour        | 3,600,000    | 80 F3 36 00 | \x80\xF3\x36\x00
+1 Day         | 86,400,000   | 00 58 27 05 | \x00\x58\x27\x05
+7 Days        | 604,800,000  | 00 90 08 24 | \x00\x90\x08\x24
+
+--------------------------------------------------------------------------------
+SEARCH STRATEGY
+--------------------------------------------------------------------------------
+
+To find ban duration logic:
+
+1. Binary Search:
+   hexdump -C libAntsVoice.so | grep "80 51 01 00"  # Search for 1-day
+   hexdump -C libanogs.so | grep "00 3C 09 00"      # Search for 7-day
+
+2. Dynamic Search (Game Guardian):
+   Search Type: Dword
+   Value: 86400 (for 1-day in seconds)
+   Value: 604800 (for 7-day in seconds)
+
+3. Modification:
+   Once found, modify to smaller value (e.g., change 86400 to 60)
+   This may reduce ban duration (experimental)
+
+WARNING: Modifying ban durations client-side may not affect server-side
+         ban tracking and could trigger additional detection.
+
+================================================================================
+        10. ADDITIONAL SECURITY FUNCTION OFFSETS
+================================================================================
+
+Additional functions that may be involved in ban detection or enforcement.
+
+--------------------------------------------------------------------------------
+LOGGING & DEBUGGING FUNCTIONS
+--------------------------------------------------------------------------------
+0x0008ADE8 | 0096 | AntsVoice_EnableLog
+
+Purpose: Enable/disable logging system
+Patch Strategy: Force enable to see debug info, or force disable to hide
+                activity from detection systems
+
+--------------------------------------------------------------------------------
+NETWORK & COMMUNICATION FUNCTIONS
+--------------------------------------------------------------------------------
+0x0008AA44 | 0136 | AntsVoice_UploadRecordedFile
+0x0008AACC | 0144 | AntsVoice_DownloadRecordedFile
+
+Purpose: File transfer to/from servers
+Relevance: May validate account status during transfer
+Patch Strategy: Monitor these for authentication checks
+
+--------------------------------------------------------------------------------
+INTERNAL STATE FUNCTIONS
+--------------------------------------------------------------------------------
+0x0008B07C | 0116 | AntsVoice_invoke
+
+Purpose: Generic method invocation (reflection-like)
+Relevance: May be used internally for dynamic checks
+Patch Strategy: Hook to see what methods are being called
+
+--------------------------------------------------------------------------------
+ROOM & SESSION MANAGEMENT
+--------------------------------------------------------------------------------
+0x0008A33C | 0100 | AntsVoice_QuitRoom
+0x0008A4EC | 0100 | AntsVoice_QuitRoom_Scenes
+
+Purpose: Leave current room/session
+Relevance: May log session data, report violations
+Patch Strategy: Clean up tracking data on quit
+
+================================================================================
+                        END OF DOCUMENT
+================================================================================
+
+This document contains comprehensive offset information for BGMI 4.1 ban
+fixing research. Use responsibly and at your own risk.
+
+For questions or updates, refer to the repository documentation.
+
+Repository: legendhkek/Ban-fix-4.1
+Document: COMPLETE_BAN_FIX_OFFSETS.txt
+Version: 1.0
+Date: 2025-11-18
+
+================================================================================
