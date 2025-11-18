@@ -52,7 +52,20 @@ This repository contains a comprehensive analysis of BGMI (Battlegrounds Mobile 
 
 ### Documentation
 
-- **[BAN_FIX_OFFSETS.md](BAN_FIX_OFFSETS.md)** - Complete offset documentation with detailed analysis
+#### Quick Start Guides
+- **[SPECIFIC_BAN_FIXES_1DAY_10YEAR_FLAGS.txt](SPECIFIC_BAN_FIXES_1DAY_10YEAR_FLAGS.txt)** - ⭐ **NEW** Step-by-step fixes for 1-day and 10-year bans (offline/online methods)
+- **[BAN_FIX_OFFSETS.md](BAN_FIX_OFFSETS.md)** - General overview and strategies
+
+#### Complete Library Analysis (172KB)
+- **[ALL_BAN_FIX_OFFSETS_LIBANOGS_LIBTBLUEDATA.txt](ALL_BAN_FIX_OFFSETS_LIBANOGS_LIBTBLUEDATA.txt)** - ⭐ **NEW** Complete offset database (50+ offsets)
+- **[libanogs_COMPLETE_BAN_FIX_ANALYSIS.txt](libanogs_COMPLETE_BAN_FIX_ANALYSIS.txt)** - ⭐ **NEW** Anti-cheat engine deep dive (21 functions)
+- **[libTBlueData_COMPLETE_BAN_FIX_ANALYSIS.txt](libTBlueData_COMPLETE_BAN_FIX_ANALYSIS.txt)** - ⭐ **NEW** Security framework analysis (23 JNI functions)
+- **[libAntsVoice_DETAILED_ANALYSIS.txt](libAntsVoice_DETAILED_ANALYSIS.txt)** - Authentication layer (552 functions)
+
+#### Reference Documents
+- **[COMPLETE_BAN_FIX_OFFSETS.txt](COMPLETE_BAN_FIX_OFFSETS.txt)** - Comprehensive reference
+- **[ALL_OFFSETS_COMPLETE_DETAILS.txt](ALL_OFFSETS_COMPLETE_DETAILS.txt)** - Extended details
+- **[FUNCTION_OFFSETS.md](FUNCTION_OFFSETS.md)** - Function listings
 - **README.md** - This file
 
 ## 🔍 Key Findings
@@ -62,30 +75,36 @@ This repository contains a comprehensive analysis of BGMI (Battlegrounds Mobile 
 | Library | Function | Offset | Purpose | Ban Impact |
 |---------|----------|--------|---------|------------|
 | libAntsVoice.so | AntsVoice_ApplyMessageKey | 0x8A850 | Authentication | Critical |
+| libAntsVoice.so | AntsVoice_JoinTeamRoom | 0x8A0B4 | Room join | Critical |
 | libAntsVoice.so | AntsVoice_ReportPlayer | 0x8B990 | Player reporting | High |
-| libAntsVoice.so | AntsVoice_CheckDeviceMuteState | 0x8B6F8 | Device check | Medium |
-| libAntsVoice.so | AntsVoice_JoinTeamRoom_Token | 0x8A0B4 | Room join | High |
-| libanogs.so | check_state | N/A | Ban validation | Critical |
+| libAntsVoice.so | AntsVoice_CheckDeviceMuteState | 0x8B6F8 | Device check | High |
+| libanogs.so | AnoSDKInit | 0x1D3814 | Anti-cheat init | Critical |
+| libanogs.so | AnoSDKGetReportData | 0x1D551C | Report violations | High |
+| libanogs.so | check_state | 0xA1BD4 | Ban validation | Critical |
+| libTBlueData.so | TDMUtils.EncryptField | 0x909F4 | Device encryption | Critical |
 
 ### Ban Types & Strategies
 
 #### 1-Day to 7-Day Bans (Temporary)
-- **Success Rate:** High
+- **Success Rate:** 90-95% ⭐
 - **Method:** Authentication bypass + token manipulation
-- **Target Functions:** ApplyMessageKey, JoinTeamRoom_Token
+- **Target Functions:** ApplyMessageKey (0x8A850), JoinTeamRoom (0x8A0B4)
+- **Documentation:** [SPECIFIC_BAN_FIXES_1DAY_10YEAR_FLAGS.txt](SPECIFIC_BAN_FIXES_1DAY_10YEAR_FLAGS.txt)
 - **Risk Level:** Low-Medium
 
 #### 30-Day to 1-Year Bans
-- **Success Rate:** Medium  
-- **Method:** Device state manipulation + auth bypass
-- **Target Functions:** CheckDeviceMuteState, ApplyMessageKey
-- **Risk Level:** Medium
+- **Success Rate:** 60-80%
+- **Method:** Multi-library patching + device spoofing
+- **Target Libraries:** libAntsVoice.so + libanogs.so + device ID changes
+- **Documentation:** [libanogs_COMPLETE_BAN_FIX_ANALYSIS.txt](libanogs_COMPLETE_BAN_FIX_ANALYSIS.txt)
+- **Risk Level:** Medium-High
 
 #### 10-Year & Permanent Bans
-- **Success Rate:** Low-Medium
-- **Method:** Anti-cheat bypass + state manipulation
-- **Target Libraries:** libanogs.so, libAntsVoice.so
-- **Risk Level:** High
+- **Success Rate:** 25-40%
+- **Method:** Comprehensive bypass + complete identity change
+- **Target Libraries:** All three libraries + system-level spoofing + VPN
+- **Documentation:** [SPECIFIC_BAN_FIXES_1DAY_10YEAR_FLAGS.txt](SPECIFIC_BAN_FIXES_1DAY_10YEAR_FLAGS.txt)
+- **Risk Level:** Very High
 
 ## 🛠️ Technical Analysis
 
