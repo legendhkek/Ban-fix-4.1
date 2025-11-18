@@ -56,10 +56,12 @@ This repository contains a comprehensive analysis of BGMI (Battlegrounds Mobile 
 - **[SPECIFIC_BAN_FIXES_1DAY_10YEAR_FLAGS.txt](SPECIFIC_BAN_FIXES_1DAY_10YEAR_FLAGS.txt)** - ⭐ **NEW** Step-by-step fixes for 1-day and 10-year bans (offline/online methods)
 - **[BAN_FIX_OFFSETS.md](BAN_FIX_OFFSETS.md)** - General overview and strategies
 
-#### Complete Library Analysis (172KB)
-- **[ALL_BAN_FIX_OFFSETS_LIBANOGS_LIBTBLUEDATA.txt](ALL_BAN_FIX_OFFSETS_LIBANOGS_LIBTBLUEDATA.txt)** - ⭐ **NEW** Complete offset database (50+ offsets)
-- **[libanogs_COMPLETE_BAN_FIX_ANALYSIS.txt](libanogs_COMPLETE_BAN_FIX_ANALYSIS.txt)** - ⭐ **NEW** Anti-cheat engine deep dive (21 functions)
-- **[libTBlueData_COMPLETE_BAN_FIX_ANALYSIS.txt](libTBlueData_COMPLETE_BAN_FIX_ANALYSIS.txt)** - ⭐ **NEW** Security framework analysis (23 JNI functions)
+#### Complete Library Analysis (238KB)
+- **[LIBANOGS_FULL_OFFSETS_DETAILED.txt](LIBANOGS_FULL_OFFSETS_DETAILED.txt)** - ⭐ **NEW** Complete offset database with exact addresses (1,219 lines, all 20 AnoSDK functions)
+- **[LIBANOGS_IMPLEMENTATION_GUIDE.md](LIBANOGS_IMPLEMENTATION_GUIDE.md)** - ⭐ **NEW** Step-by-step implementation guide with Frida scripts and hex patches
+- **[ALL_BAN_FIX_OFFSETS_LIBANOGS_LIBTBLUEDATA.txt](ALL_BAN_FIX_OFFSETS_LIBANOGS_LIBTBLUEDATA.txt)** - ⭐ Complete offset database (50+ offsets)
+- **[libanogs_COMPLETE_BAN_FIX_ANALYSIS.txt](libanogs_COMPLETE_BAN_FIX_ANALYSIS.txt)** - ⭐ Anti-cheat engine deep dive (21 functions)
+- **[libTBlueData_COMPLETE_BAN_FIX_ANALYSIS.txt](libTBlueData_COMPLETE_BAN_FIX_ANALYSIS.txt)** - ⭐ Security framework analysis (23 JNI functions)
 - **[libAntsVoice_DETAILED_ANALYSIS.txt](libAntsVoice_DETAILED_ANALYSIS.txt)** - Authentication layer (552 functions)
 
 #### Reference Documents
