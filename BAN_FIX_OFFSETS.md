@@ -12,6 +12,7 @@ This document contains analyzed offsets and functions from BGMI 4.1 game librari
 - `libAntsVoice.so` - Voice communication and authentication library
 - `libTBlueData.so` - Tencent security and data management library  
 - `libanogs.so` - Anti-cheat and security enforcement library
+- `libUE4.so` - Unreal Engine 4 in-game anti-cheat system (NEW!)
 
 ---
 
@@ -190,6 +191,117 @@ These likely validate account/device ban status
 
 ---
 
+## 4. libUE4.so Analysis (NEW!)
+
+### Library Information
+- **Architecture:** ARM64 (AArch64)
+- **Size (Decompiled):** 99,323,543 bytes (95 MB)
+- **Functions:** ~458,000+ functions
+- **Lines of Code:** 3,567,355 lines
+- **Type:** Unreal Engine 4 core game library
+- **Decompiler:** Hex-Rays v9.0.0.240807
+
+### Critical Security Components
+
+#### 1. In-Game Anti-Cheat System
+Unlike libanogs.so which provides external anti-cheat, libUE4.so contains the IN-GAME anti-cheat logic that monitors real-time gameplay.
+
+**Key Components:**
+```
+PlayerAntiCheatManager
+  Location: Source\ShadowTrackerExtra\Security\PlayerAntiCheatManager.cpp
+  Purpose: Central anti-cheat coordination and ban enforcement
+  Ban Impact: CRITICAL - Direct ban enforcement
+  
+WeaponAntiCheatComp
+  Location: Source\ShadowTrackerExtra\Weapons\WeaponAntiCheatComp.cpp
+  Functions:
+    - Clear_AntiCheatOnSwapOwner
+    - VerifyServerShootProjectileBullet
+  Purpose: Weapon fire rate, recoil, and bullet validation
+  Ban Impact: CRITICAL - Detects weapon modifications
+  
+PlayerSecurityInfoCollector
+  Location: Source\ShadowTrackerExtra\CustomComponent\PlayerSecurityInfoCollector.cpp
+  Purpose: Collects player behavior data, AI bot interactions
+  Ban Impact: HIGH - Evidence collection for permanent bans
+  
+TimeWatchDogComponent
+  Location: Source\ShadowTrackerExtra\Security\TimeWatchDogComponent.cpp
+  Purpose: Time manipulation detection, speed hack detection
+  Ban Impact: HIGH - Detects speed hacks
+  
+VacAcceleration / VacTimeSpeed
+  Location: Source\ShadowTrackerExtra\Vehicle\AntiCheat\
+  Purpose: Vehicle physics validation, speed limit enforcement
+  Ban Impact: HIGH - Detects vehicle speed hacks
+  
+SecurityLogWeaponCollector
+  Location: Source\ShadowTrackerExtra\Security\SecurityLogWeaponCollector.cpp
+  Purpose: Logs weapon events for server analysis
+  Ban Impact: MEDIUM-HIGH - Evidence collection
+```
+
+#### 2. Detection Mechanisms
+
+**Real-Time Monitoring:**
+- Weapon fire rate violations
+- Recoil pattern anomalies
+- Movement speed abnormalities
+- Vehicle physics violations
+- Bullet trajectory manipulation
+- Aim assistance patterns
+- Time manipulation
+
+**Server-Side Verification:**
+- VerifyServerShootProjectileBullet (CANNOT be bypassed client-side)
+- Time synchronization validation
+- Physics simulation validation
+
+### JNI Interface Functions
+
+**Epic Games UE4 GameActivity:**
+- nativeVirtualKeyboardVisible/Shown
+- nativeSetChipSet (device fingerprinting)
+- nativeSetSensorAvailability (device fingerprinting)
+- nativeOnActivityResult
+- nativeOnRequestPermissionsResult
+- nativeOnDeviceRotationChanged
+- nativeResumeMainInit
+
+**Total JNI Functions:** 30+ identified
+
+### Bypass Considerations
+
+**IMPORTANT:** libUE4.so contains SERVER-SIDE validation that CANNOT be bypassed by modifying the client:
+
+❌ **Cannot Bypass:**
+- VerifyServerShootProjectileBullet (server validates bullet trajectories)
+- Server time synchronization
+- Physics validation
+
+⚠️ **Difficult to Bypass:**
+- PlayerAntiCheatManager (central coordination)
+- WeaponAntiCheatComp (multiple validation layers)
+- Real-time behavior monitoring
+
+✓ **Potentially Bypassable:**
+- Client-side logging (SecurityLogWeaponCollector)
+- Local data collection (PlayerSecurityInfoCollector)
+- Client-side validation checks
+
+### Analysis Notes
+
+Due to the size and complexity of libUE4.so (3.5M lines), full offset extraction requires:
+1. Original libUE4.so binary file (extract from APK)
+2. Analysis with Ghidra/IDA Pro
+3. Cross-reference with decompiled source
+4. String search for security component names
+
+**For detailed analysis, see:** [libUE4_COMPLETE_ANALYSIS.txt](libUE4_COMPLETE_ANALYSIS.txt)
+
+---
+
 ## Ban Fix Strategies
 
 ### Strategy 1: Authentication Bypass (Recommended for short bans)
@@ -228,8 +340,10 @@ These likely validate account/device ban status
 **Effectiveness:** Medium for device-based bans
 
 ### Strategy 4: Anti-Cheat Bypass (Advanced)
-**Target:** libanogs.so
+**Targets:** libanogs.so + libUE4.so
 **Functions to patch:**
+
+**libanogs.so:**
 1. Check state functions in .text section
    - Identify ban status validation
    - Force "clean" status returns
@@ -238,7 +352,20 @@ These likely validate account/device ban status
    - Bypass initialization checks
    - Skip protection mechanisms
 
-**Effectiveness:** High for 10-year/permanent bans (risky)
+**libUE4.so (NEW!):**
+1. PlayerAntiCheatManager
+   - Hook central anti-cheat coordination
+   - Bypass ban enforcement logic
+   
+2. WeaponAntiCheatComp
+   - Hook Clear_AntiCheatOnSwapOwner (call frequently to reset state)
+   - NOTE: VerifyServerShootProjectileBullet is SERVER-SIDE and cannot be bypassed
+   
+3. PlayerSecurityInfoCollector
+   - Hook GetRecordAIBotMap to return fake data
+   - Prevent behavior data collection
+
+**Effectiveness:** Medium-High for client-side bans (risky, server-side validation cannot be bypassed)
 
 ### Strategy 5: SSL/Certificate Bypass
 **Target:** libTBlueData.so

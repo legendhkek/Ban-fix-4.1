@@ -50,13 +50,21 @@ This repository contains a comprehensive analysis of BGMI (Battlegrounds Mobile 
    - Memory protection
    - State validation
 
+4. **libUE4.so** (95 MB decompiled)
+   - Unreal Engine 4 core library
+   - In-game anti-cheat system
+   - Real-time player monitoring
+   - Weapon/vehicle validation
+   - Server-side verification
+
 ### Documentation
 
 #### Quick Start Guides
 - **[SPECIFIC_BAN_FIXES_1DAY_10YEAR_FLAGS.txt](SPECIFIC_BAN_FIXES_1DAY_10YEAR_FLAGS.txt)** - ⭐ **NEW** Step-by-step fixes for 1-day and 10-year bans (offline/online methods)
 - **[BAN_FIX_OFFSETS.md](BAN_FIX_OFFSETS.md)** - General overview and strategies
 
-#### Complete Library Analysis (238KB)
+#### Complete Library Analysis (238KB+)
+- **[libUE4_COMPLETE_ANALYSIS.txt](libUE4_COMPLETE_ANALYSIS.txt)** - ⭐ **NEW** Unreal Engine 4 in-game anti-cheat system (458K+ functions, 3.5M lines)
 - **[LIBANOGS_FULL_OFFSETS_DETAILED.txt](LIBANOGS_FULL_OFFSETS_DETAILED.txt)** - ⭐ **NEW** Complete offset database with exact addresses (1,219 lines, all 20 AnoSDK functions)
 - **[LIBANOGS_IMPLEMENTATION_GUIDE.md](LIBANOGS_IMPLEMENTATION_GUIDE.md)** - ⭐ **NEW** Step-by-step implementation guide with Frida scripts and hex patches
 - **[ALL_BAN_FIX_OFFSETS_LIBANOGS_LIBTBLUEDATA.txt](ALL_BAN_FIX_OFFSETS_LIBANOGS_LIBTBLUEDATA.txt)** - ⭐ Complete offset database (50+ offsets)
@@ -84,6 +92,10 @@ This repository contains a comprehensive analysis of BGMI (Battlegrounds Mobile 
 | libanogs.so | AnoSDKGetReportData | 0x1D551C | Report violations | High |
 | libanogs.so | check_state | 0xA1BD4 | Ban validation | Critical |
 | libTBlueData.so | TDMUtils.EncryptField | 0x909F4 | Device encryption | Critical |
+| libUE4.so | PlayerAntiCheatManager | See Analysis | In-game anti-cheat | Critical |
+| libUE4.so | WeaponAntiCheatComp | See Analysis | Weapon validation | Critical |
+| libUE4.so | PlayerSecurityInfoCollector | See Analysis | Behavior monitoring | High |
+| libUE4.so | TimeWatchDogComponent | See Analysis | Time validation | High |
 
 ### Ban Types & Strategies
 
@@ -135,6 +147,7 @@ Protection: Stripped symbols (limited)
 libAntsVoice.so: 552 exported functions
 libTBlueData.so: Limited exports (security library)
 libanogs.so: 237 exported functions
+libUE4.so: 458,000+ functions (decompiled, 3.5M lines)
 ```
 
 ## 📊 Ban Fix Strategies
