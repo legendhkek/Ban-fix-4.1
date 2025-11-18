@@ -500,8 +500,114 @@ readelf -s libAntsVoice.so | grep FUNC | grep GLOBAL > functions_only.txt
 
 ---
 
-**Document Version:** 1.0  
+## libUE4.so - Key Functions (NEW!)
+
+**Library:** libUE4.so  
+**Version:** BGMI 4.1  
+**Architecture:** ARM64 (AArch64)  
+**Total Functions:** ~458,000+ (decompiled)  
+**File Size:** 95 MB (decompiled source)
+
+### Critical Anti-Cheat Functions
+
+⚠️ **Note:** libUE4.so offsets require extraction of the original binary from APK. The decompiled source uses function names like `sub_XXXXXXX` which correspond to offsets `0xXXXXXXX`.
+
+#### Priority Level: CRITICAL ⚠️
+
+| Component | Purpose | Ban Impact |
+|-----------|---------|------------|
+| **PlayerAntiCheatManager** | Central anti-cheat coordination | CRITICAL |
+| **WeaponAntiCheatComp** | Weapon validation system | CRITICAL |
+| **PlayerSecurityInfoCollector** | Player behavior monitoring | HIGH |
+
+#### Key Security Components
+
+**1. WeaponAntiCheatComp Functions:**
+- `Clear_AntiCheatOnSwapOwner` - Clears anti-cheat state on weapon change
+- `VerifyServerShootProjectileBullet` - **SERVER-SIDE** bullet validation (CANNOT BYPASS)
+
+**2. PlayerAntiCheatManager:**
+- Central coordination of all anti-cheat systems
+- Ban decision enforcement
+- Communication with external anti-cheat (libanogs.so)
+
+**3. PlayerSecurityInfoCollector:**
+- `GetRecordAIBotMap` - Records AI bot interactions (aimbot detection)
+- Collects player behavior data
+- Evidence collection for permanent bans
+
+**4. TimeWatchDogComponent:**
+- Time synchronization validation
+- Speed hack detection
+- Client-server time comparison
+
+**5. Vehicle Anti-Cheat (VacAcceleration / VacTimeSpeed):**
+- Vehicle physics validation
+- Speed limit enforcement
+- Acceleration monitoring
+
+**6. SecurityLogWeaponCollector:**
+- `[SecurityLog OnCharacterWeaponShootHit]` - Weapon hit event logging
+- Server-side analysis feed
+
+### JNI Interface Functions
+
+#### Epic Games UE4 GameActivity
+
+| Function | Parameters | Purpose | Ban Impact |
+|----------|-----------|---------|------------|
+| `Java_com_epicgames_ue4_GameActivity_nativeSetChipSet` | Device info | Device fingerprinting | LOW |
+| `Java_com_epicgames_ue4_GameActivity_nativeSetSensorAvailability` | Sensor flags | Device fingerprinting | LOW |
+| `JNI_OnLoad` | JavaVM | Initialize JNI | CRITICAL |
+
+### Detection Mechanisms
+
+**Real-Time Monitoring:**
+1. Weapon fire rate violations
+2. Recoil pattern anomalies  
+3. Movement speed abnormalities
+4. Vehicle physics violations
+5. Bullet trajectory manipulation (server-verified)
+6. Aim assistance patterns
+7. Time manipulation
+
+### Extraction Instructions
+
+To get exact offsets for libUE4.so:
+
+```bash
+# Extract from APK
+unzip BGMI_4.1.apk
+cd lib/arm64-v8a/
+
+# Analyze with readelf
+readelf -s libUE4.so | grep -i "security\|anticheat"
+
+# Or use Ghidra/IDA Pro
+# 1. Load libUE4.so
+# 2. Search for strings: "PlayerAntiCheat", "WeaponAntiCheat", "Security"
+# 3. Cross-reference with decompiled source (libUE4.so.c)
+```
+
+### Important Notes
+
+🚫 **SERVER-SIDE VALIDATION:**
+The following CANNOT be bypassed by modifying libUE4.so:
+- VerifyServerShootProjectileBullet (bullet trajectory validation)
+- Server time synchronization
+- Physics validation
+
+⚠️ **Decompiled Source:**
+- libUE4.so.c provides function structure but not exact offsets
+- Original binary analysis required for precise offsets
+- Use string references to locate functions
+
+**For detailed analysis:** See [libUE4_COMPLETE_ANALYSIS.txt](libUE4_COMPLETE_ANALYSIS.txt)
+
+---
+
+**Document Version:** 1.1  
 **Last Updated:** 2025-11-18  
 **Game Version:** BGMI 4.1  
-**Library:** libAntsVoice.so  
+**Libraries:** libAntsVoice.so, libUE4.so  
 **Status:** Research Complete ✅

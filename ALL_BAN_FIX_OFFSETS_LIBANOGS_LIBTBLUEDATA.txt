@@ -3,11 +3,13 @@
                     Complete Offset Reference Database
 ================================================================================
 
-Document Version: 1.0
+Document Version: 1.1
 Last Updated: 2025-11-18
 Game Version: BGMI 4.1
 Libraries: libanogs.so, libTBlueData.so (also known as libtbluemaster)
 Architecture: ARM64 (AArch64)
+
+NOTE: For libUE4.so in-game anti-cheat analysis, see libUE4_COMPLETE_ANALYSIS.txt
 
 WARNING: This file is for educational and security research purposes only.
          Modifying game files violates Terms of Service.
@@ -1142,12 +1144,17 @@ RELATED DOCUMENTATION:
 - libAntsVoice_DETAILED_ANALYSIS.txt (authentication offsets)
 - libanogs_COMPLETE_BAN_FIX_ANALYSIS.txt (detailed anti-cheat analysis)
 - libTBlueData_COMPLETE_BAN_FIX_ANALYSIS.txt (detailed security analysis)
+- libUE4_COMPLETE_ANALYSIS.txt (NEW! in-game anti-cheat system)
 - BAN_FIX_OFFSETS.md (general overview)
 - COMPLETE_BAN_FIX_OFFSETS.txt (comprehensive reference)
 
 ================================================================================
                         DOCUMENT VERSION HISTORY
 ================================================================================
+
+Version 1.1 - 2025-11-18
+- Added reference to libUE4_COMPLETE_ANALYSIS.txt
+- Updated related documentation list
 
 Version 1.0 - 2025-11-18
 - Initial complete offset reference
