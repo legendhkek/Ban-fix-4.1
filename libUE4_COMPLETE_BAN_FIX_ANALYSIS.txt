@@ -1,0 +1,625 @@
+================================================================================
+            LIBUE4.SO - COMPLETE BAN FIX OFFSET ANALYSIS
+         Unreal Engine 4 Core - All Security & Anti-Cheat Offsets
+================================================================================
+
+Document Version: 2.0 - COMPREHENSIVE
+Last Updated: 2025-11-18
+Game Version: BGMI 4.1
+Library: libUE4.so (Unreal Engine 4 Game Engine Core)
+Architecture: ARM64 (AArch64)
+File Size: 99,323,543 bytes (~95 MB decompiled source)
+Total Functions: 220,234+
+Decompiler: Hex-Rays 9.0.0.240807
+
+PROVIDER: @THUNDEROWNERX | Telegram: @THUNDER_BGMI_SRC
+
+WARNING: This document is for educational and security research purposes only.
+         Modifying game files violates BGMI Terms of Service and may result
+         in permanent account termination and device blacklisting.
+
+================================================================================
+                         EXECUTIVE SUMMARY
+================================================================================
+
+Security Functions Identified: 708
+Security String References: 94
+Source File References: 9
+JNI Interface Functions: 20
+
+KEY COMPONENTS ANALYZED:
+  ✓ PlayerSecurityInfoCollector - Security data collection system
+  ✓ TimeWatchDogComponent - Time-based cheat detection
+  ✓ PlayerAntiCheatManager - Main anti-cheat controller
+  ✓ SecurityLogWeaponCollector - Weapon security logging
+  ✓ WeaponAntiCheatComp - Weapon-specific anti-cheat
+  ✓ VacAcceleration & VacTimeSpeed - Vehicle anti-cheat
+  ✓ GMCheatManager - Game Master debugging tools
+
+================================================================================
+                         TABLE OF CONTENTS
+================================================================================
+
+1. Security-Related Source Files
+2. Critical Security Functions & Offsets
+3. Anti-Cheat Component Analysis
+4. Security String Messages by Category
+5. JNI Interface Functions
+6. Ban Fix Strategy Recommendations
+7. Implementation Guide & Hex Patches
+
+================================================================================
+        1. SECURITY-RELATED SOURCE FILES (Build Path References)
+================================================================================
+
+These source file paths were found in debug symbols, indicating the
+original C++ source files compiled into this library:
+
+  1. G:/Release4.1.0/AS/Survive/Source/Development/GMCheat/GMCheatAvatar.cpp
+  2. G:/Release4.1.0/AS/Survive/Source/Development/GMCheat/GMCheatManager.cpp
+  3. G:\\Release4.1.0\\AS\\Survive\\Source\\ShadowTrackerExtra\\CustomComponent\\PlayerSecurityInfoCollector.cpp
+  4. G:\\Release4.1.0\\AS\\Survive\\Source\\ShadowTrackerExtra\\Security\\PlayerAntiCheatManager.cpp
+  5. G:\\Release4.1.0\\AS\\Survive\\Source\\ShadowTrackerExtra\\Security\\SecurityLogWeaponCollector.cpp
+  6. G:\\Release4.1.0\\AS\\Survive\\Source\\ShadowTrackerExtra\\Security\\TimeWatchDogComponent.cpp
+  7. G:\\Release4.1.0\\AS\\Survive\\Source\\ShadowTrackerExtra\\Vehicle\\AntiCheat\\VacAcceleration.cpp
+  8. G:\\Release4.1.0\\AS\\Survive\\Source\\ShadowTrackerExtra\\Vehicle\\AntiCheat\\VacTimeSpeed.cpp
+  9. G:\\Release4.1.0\\AS\\Survive\\Source\\ShadowTrackerExtra\\Weapons\\WeaponAntiCheatComp.cpp
+
+================================================================================
+            2. CRITICAL SECURITY FUNCTIONS & OFFSETS
+================================================================================
+
+
+ANTI-CHEAT FUNCTIONS
+--------------------------------------------------------------------------------
+Count: 14 functions
+
+Offset          Function                  Line       Purpose/Context
+--------------------------------------------------------------------------------
+0x6272568       sub_6272568               626061     "G:\\Release4.1.0\\AS\\Survive\\Source\\
+0x62749E8       sub_62749E8               626095     "G:\\Release4.1.0\\AS\\Survive\\Source\\
+0x6274AA0       sub_6274AA0               626138     "G:\\Release4.1.0\\AS\\Survive\\Source\\
+0x66133BC       sub_66133BC               662681     "G:\\Release4.1.0\\AS\\Survive\\Source\\
+0x6614EA4       sub_6614EA4               662717     "G:\\Release4.1.0\\AS\\Survive\\Source\\
+0x7CF5AB8       sub_7CF5AB8               1682517    "G:/Release4.1.0/AS/Survive/Source/Devel
+0x7D20DB0       sub_7D20DB0               1682658    "G:/Release4.1.0/AS/Survive/Source/Devel
+0x7D21690       sub_7D21690               1682683    "G:/Release4.1.0/AS/Survive/Source/Devel
+0x7D218E0       sub_7D218E0               1682759    "G:/Release4.1.0/AS/Survive/Source/Devel
+0x7D38B6C       sub_7D38B6C               1682928    "G:/Release4.1.0/AS/Survive/Source/Devel
+0x7D3E650       sub_7D3E650               1683063    "G:/Release4.1.0/AS/Survive/Source/Devel
+0x7D3E6DC       sub_7D3E6DC               1683089    "G:/Release4.1.0/AS/Survive/Source/Devel
+0x7D4049C       sub_7D4049C               1683118    "G:/Release4.1.0/AS/Survive/Source/Devel
+0x7E86434       sub_7E86434               1734966    // 393DFB4: using guessed type __int16 a
+
+
+BAN DETECTION & ENFORCEMENT
+--------------------------------------------------------------------------------
+Count: 26 functions
+
+Offset          Function                  Line       Purpose/Context
+--------------------------------------------------------------------------------
+0x5626CB8       sub_5626CB8               504626     ((void (__fastcall *)(__int64 *, const _
+0x60FEAC8       sub_60FEAC8               608254     "STextBlock",
+0x7D49A14       sub_7D49A14               1683464    ((void (__fastcall *)(__int64, const __i
+0x7DFFC28       sub_7DFFC28               1709593    L"MallocBinned2 Corruption Canary was 0x
+0x7DFFE84       sub_7DFFE84               1709683    L"FMallocBinned2 Attempt to realloc an u
+0x805835C       sub_805835C               1830130    L"Name may not contain the following cha
+0x830E704       sub_830E704               1905665    L"TextBlockStyle",
+0x8546DC0       sub_8546DC0               1960638    "STextBlock",
+0x97A6C0C       sub_97A6C0C               2194454    (__int64)L"TextBlock",
+0x97A84C4       sub_97A84C4               2194757    (__int64)L"TextBlock",
+0xA9A3620       sub_A9A3620               2766030    "G:\\Release4.1.0\\AS\\Survive\\Plugins\
+0xA9B2494       sub_A9B2494               2767112    "G:\\Release4.1.0\\AS\\Survive\\Plugins\
+0xA9EFBD8       sub_A9EFBD8               2768259    "G:\\Release4.1.0\\AS\\Survive\\Plugins\
+0xAA32C1C       sub_AA32C1C               2771314    "G:\\Release4.1.0\\AS\\Survive\\Plugins\
+0xAA5FAD0       sub_AA5FAD0               2774659    v7 = L"[UCommentBlock::CopyTo] wrong id 
+0xAA634F0       sub_AA634F0               2774984    "G:\\Release4.1.0\\AS\\Survive\\Plugins\
+0xAA76F40       sub_AA76F40               2776585    "G:\\Release4.1.0\\AS\\Survive\\Plugins\
+0xAA948A8       sub_AA948A8               2777557    "G:\\Release4.1.0\\AS\\Survive\\Plugins\
+0xAADE018       sub_AADE018               2780265    "G:\\Release4.1.0\\AS\\Survive\\Plugins\
+0xAB5F650       sub_AB5F650               2782767    "G:\\Release4.1.0\\AS\\Survive\\Plugins\
+0xAB60C0C       sub_AB60C0C               2782914    "G:\\Release4.1.0\\AS\\Survive\\Plugins\
+0xAC5F280       sub_AC5F280               2812015    // 38E2F58: using guessed type __int16 a
+0xB100FB4       sub_B100FB4               3022831    "after_blockHeaderPtr + packedQHLen == c
+0xB101AAC       sub_B101AAC               3023295    (__int64)"OODLE ERROR : newLZ_encode_blo
+0xB204B4C       sub_B204B4C               3081485    // 32EEFF4: using guessed type __int16 a
+0xBCEE644       sub_BCEE644               3429625    ((void (__fastcall *)(void *, const __in
+
+
+GM/ADMIN TOOLS
+--------------------------------------------------------------------------------
+Count: 10 functions
+
+Offset          Function                  Line       Purpose/Context
+--------------------------------------------------------------------------------
+0x57C9468       sub_57C9468               524597     L"chara.debug.parachute");
+0x5BEEACC       sub_5BEEACC               564186     // 36F1EE0: using guessed type __int16 a
+0x63A5DFC       sub_63A5DFC               642377     ((void (__fastcall *)(__int64 *, const _
+0x7F328B4       sub_7F328B4               1759304    "G:\\Release4.1.0\\AS\\UE4181\\Engine\\S
+0x7F364B0       sub_7F364B0               1759813    "G:\\Release4.1.0\\AS\\UE4181\\Engine\\S
+0x957EDA4       sub_957EDA4               2119094    // 35862D8: using guessed type __int16 a
+0xA176614       sub_A176614               2441430    L"p.SetDebugFlag",
+0xA2F5A7C       sub_A2F5A7C               2468885    "G:\\Release4.1.0\\AS\\UE4181\\Engine\\S
+0xB02EC4C       sub_B02EC4C               2950558    v54 = "physx3_debugger_internal";
+0xB6A832C       sub_B6A832C               3266066    v11 = fopen("/sdcard/Download/dolby/da4m
+
+
+MONITORING & DETECTION
+--------------------------------------------------------------------------------
+Count: 503 functions
+
+Offset          Function                  Line       Purpose/Context
+--------------------------------------------------------------------------------
+0x52C9880       sub_52C9880               417790     // write access to const memory has been
+0x52CE204       sub_52CE204               417919     // 52CE358: write access to const memory
+0x52D4B6C       sub_52D4B6C               423680     // write access to const memory has been
+0x52D4B8C       sub_52D4B8C               423705     // 52D4D80: write access to const memory
+0x52D59E8       sub_52D59E8               423800     // write access to const memory has been
+0x52D5B40       sub_52D5B40               423825     // 52D5D34: write access to const memory
+0x52E1334       sub_52E1334               428290     // write access to const memory has been
+0x52E179C       sub_52E179C               428478     // 52E1CCC: write access to const memory
+0x52F1124       sub_52F1124               432589     // write access to const memory has been
+0x52F13C0       sub_52F13C0               432732     // 52F1AF0: write access to const memory
+0x52F1B80       sub_52F1B80               432933     // 52F1F64: write access to const memory
+0x52F4C80       sub_52F4C80               435264     // write access to const memory has been
+0x52F4D58       sub_52F4D58               435371     // 52F4ED4: write access to const memory
+0x52F58C0       sub_52F58C0               435860     // write access to const memory has been
+0x52F5968       sub_52F5968               435906     // 52F5D20: write access to const memory
+0x52F97E4       sub_52F97E4               439505     // positive sp value has been detected, 
+0x52FE48C       sub_52FE48C               439923     // write access to const memory has been
+0x52FE700       sub_52FE700               440072     // 52FFE78: write access to const memory
+0x5313354       sub_5313354               446678     // write access to const memory has been
+0x5313360       sub_5313360               446794     // 53134EC: write access to const memory
+0x531754C       sub_531754C               449729     // write access to const memory has been
+0x531775C       sub_531775C               449836     // 53178D8: write access to const memory
+0x5321028       sub_5321028               453600     // write access to const memory has been
+0x5321040       sub_5321040               453702     // 53211AC: write access to const memory
+0x5321270       sub_5321270               453785     // write access to const memory has been
+0x5321288       sub_5321288               453887     // 53213F4: write access to const memory
+0x53214A4       sub_53214A4               453958     // write access to const memory has been
+0x53214BC       sub_53214BC               454060     // 5321628: write access to const memory
+0x5321910       sub_5321910               454262     // write access to const memory has been
+0x5321928       sub_5321928               454364     // 5321A94: write access to const memory
+
+... and 473 more functions in this category
+
+
+REPORTING & LOGGING
+--------------------------------------------------------------------------------
+Count: 137 functions
+
+Offset          Function                  Line       Purpose/Context
+--------------------------------------------------------------------------------
+0x52A878C       sub_52A878C               412840     sub_7DD8330(L"LogAndroidEvents: EnqueueA
+0x52A899C       sub_52A899C               412909     sub_7DD8330(L"LogAndroidEvents: EnqueueA
+0x52C5D10       sub_52C5D10               416974     (((__int64 (__fastcall *)(void *, const 
+0x52D7564       sub_52D7564               424686     return __android_log_print(
+0x52D7710       sub_52D7710               424723     __android_log_print(2, "threaded_app", "
+0x52D7CF8       sub_52D7CF8               424964     __android_log_print(2, "threaded_app", "
+0x52D7D7C       sub_52D7D7C               424988     __android_log_print(2, "threaded_app", "
+0x52D7E38       sub_52D7E38               425015     __android_log_print(2, "threaded_app", "
+0x52D7F1C       sub_52D7F1C               425046     __android_log_print(2, "threaded_app", "
+0x52D7FF0       sub_52D7FF0               425073     __android_log_print(2, "threaded_app", "
+0x52D80C0       sub_52D80C0               425100     __android_log_print(2, "threaded_app", b
+0x52D8144       sub_52D8144               425127     __android_log_print(2, "threaded_app", "
+0x52D828C       sub_52D828C               425173     __android_log_print(2, "threaded_app", "
+0x52D8360       sub_52D8360               425208     __android_log_print(2, "threaded_app", "
+0x52D83E8       sub_52D83E8               425231     __android_log_print(2, "threaded_app", "
+0x52D8470       sub_52D8470               425254     __android_log_print(2, "threaded_app", "
+0x52D8534       sub_52D8534               425280     __android_log_print(2, "threaded_app", b
+0x52D85F8       sub_52D85F8               425307     __android_log_print(2, "threaded_app", "
+0x52D86E4       sub_52D86E4               425342     __android_log_print(2, "threaded_app", "
+0x52D87A8       sub_52D87A8               425368     __android_log_print(2, "threaded_app", "
+0x52D886C       sub_52D886C               425395     __android_log_print(2, "threaded_app", b
+0x52D8908       sub_52D8908               425441     __android_log_print(2, "threaded_app", "
+0x52D8A3C       sub_52D8A3C               425490     __android_log_print(6, "threaded_app", "
+0x52D8AF8       sub_52D8AF8               425515     __android_log_print(2, "threaded_app", "
+0x52F82D0       sub_52F82D0               438219     v7 = logf((float)a2);
+0x5DE30DC       sub_5DE30DC               580392     v7 = logf((float)a2);
+0x5F514BC       sub_5F514BC               593853     *(float *)&result = logf((float)(v18 - v
+0x6E420A4       sub_6E420A4               1245921    ((void (__fastcall *)(__int64, const __i
+0x6F17CD4       sub_6F17CD4               1273108    L"-----UAReportEnable = %d",
+0x7049C44       sub_7049C44               1277382    L"UGameFrontendHUD::AfterLoadedEditorLog
+
+... and 107 more functions in this category
+
+
+SECURITY VALIDATION
+--------------------------------------------------------------------------------
+Count: 18 functions
+
+Offset          Function                  Line       Purpose/Context
+--------------------------------------------------------------------------------
+0x52D6104       sub_52D6104               424254     L"Enable check android is has virtual in
+0x57CFEAC       sub_57CFEAC               524828     L"ASTExtraBaseCharacter::CheckCanInterru
+0x5A5EEB4       sub_5A5EEB4               550051     v4 = L"UPlayerSecurityInfoCollector::Get
+0x5D962A4       sub_5D962A4               576845     L"CheckQuitSpectatingInClientRestart_Imp
+0x60250D0       sub_60250D0               601493     "G:\\Release4.1.0\\AS\\Survive\\Source\\
+0x60293B4       sub_60293B4               601850     "G:\\Release4.1.0\\AS\\Survive\\Source\\
+0x7277C60       sub_7277C60               1338727    L"UIMSDKHelper::CheckIsRegisted");
+0x72782B8       sub_72782B8               1338968    L"UIMSDKHelper::InvalidateQRCode: return
+0x8145A70       sub_8145A70               1852249    || (((__int64 (__fastcall *)(__int64, co
+0x834E104       sub_834E104               1930392    L"r.AsyncPSO.EnableCheckBinaryCache");
+0x9E14820       sub_9E14820               2363392    L"FGotoTimeInSecondsTask::CheckpointRead
+0x9E7FFF4       sub_9E7FFF4               2372649    L"Standby check is %s with RxTime (%f), 
+0xA7B1F40       sub_A7B1F40               2704879    if ( (unsigned int)glCheckFramebufferSta
+0xA993928       sub_A993928               2764462    L"FInMemoryReplay::MarkForKeep Middle Ch
+0xB0A8C80       sub_B0A8C80               2973275    "  Check OodleLZ_Compressor_RespectsDict
+0xBAB91BC       sub_BAB91BC               3369209    "G:\\Release4.1.0\\AS\\Survive\\Plugins\
+0xBAB9788       sub_BAB9788               3369279    "activeCheckComponent.cpp",
+0xE286AF4       sub_E286AF4               333005     char *off_C7464D0 = "AddPingVerifyData";
+
+================================================================================
+                3. SECURITY STRING MESSAGES BY CATEGORY
+================================================================================
+
+These string literals provide insight into security checks and error handling:
+
+
+ANTI-CHEAT FUNCTIONS
+--------------------------------------------------------------------------------
+Count: 6 messages
+
+Line   662685 @ 0x66133BC     [sub_66133BC]
+  → UWeaponAntiCheatComp::Clear_AntiCheatOnSwapOwner
+
+Line   662721 @ 0x6614EA4     [sub_6614EA4]
+  → UWeaponAntiCheatComp::VerifyServerShootProjectileBullet: Faild as [%u]
+
+Line  1682932 @ 0x7D38B6C     [sub_7D38B6C]
+  → UGMCheatManager::DumpAnimLayer AnimChild Layer:%d
+
+Line  1683093 @ 0x7D3E6DC     [sub_7D3E6DC]
+  → UGMCheatManager::GMSetDeliveryToMLAI, bDeliveryToMLAIGM=%d, InIsDeliveryToMLAI = %d
+
+Line  1683122 @ 0x7D4049C     [sub_7D4049C]
+  → UGMCheatManager::TestReplayStreamerLastError
+
+Line  1683141 @ 0x7D4049C     [sub_7D4049C]
+  → UGMCheatManager::TestReplayStreamerLastError ServiceUnavailable
+
+
+BAN DETECTION & ENFORCEMENT
+--------------------------------------------------------------------------------
+Count: 14 messages
+
+Line   504626 @ 0x5626CB8     [sub_5626CB8]
+  → BlockBulletTag
+
+Line  1683464 @ 0x7D49A14     [sub_7D49A14]
+  → IsCastSkillBlocked
+
+Line  1709593 @ 0x7DFFC28     [sub_7DFFC28]
+  → MallocBinned2 Corruption Canary was 0x%x, should be 0x%x. This block is both preexisting and guaranteed to be new;
+
+Line  1709601 @ 0x7DFFC28     [sub_7DFFC28]
+  → MallocBinned2 Corruption Canary was 0x%x, should be 0x%x. This block is both preexisting and guaranteed t
+
+Line  1709612 @ 0x7DFFC28     [sub_7DFFC28]
+  → MallocBinned2 Corruption Canary was 0x%x, should be 0x%x because this block should be preexisting.
+
+Line  1709619 @ 0x7DFFC28     [sub_7DFFC28]
+  → MallocBinned2 Corruption Canary was 0x%x, should be 0x%x because this block should be preexisting.
+
+Line  1709683 @ 0x7DFFE84     [sub_7DFFE84]
+  → FMallocBinned2 Attempt to realloc an unrecognized block %p   canary == 0x%x != 0x%x
+
+Line  1709691 @ 0x7DFFE84     [sub_7DFFE84]
+  → FMallocBinned2 Attempt to realloc an unrecognized block %p   canary == 0x%x != 0x%x
+
+Line  1830130 @ 0x805835C     [sub_805835C]
+  → Name may not contain the following characters: '{IllegalNameCharacters}'
+
+Line  1905665 @ 0x830E704     [sub_830E704]
+  → TextBlockStyle
+
+Line  2771327 @ 0xAA32C1C     [sub_AA32C1C]
+  → RemoveCommentWithSingleBlockProcess failed, block is not valid
+
+Line  2774659 @ 0xAA5FAD0     [sub_AA5FAD0]
+  → [UCommentBlock::CopyTo] wrong id for inputSlots.
+
+Line  2774668 @ 0xAA5FAD0     [sub_AA5FAD0]
+  → [UCommentBlock::CopyTo] target is not UCommentBlock.
+
+Line  3429625 @ 0xBCEE644     [sub_BCEE644]
+  → LogBlockExecuteTime
+
+
+GM/ADMIN TOOLS
+--------------------------------------------------------------------------------
+Count: 5 messages
+
+Line   524597 @ 0x57C9468     [sub_57C9468]
+  → chara.debug.parachute
+
+Line   593568 @ 0x5F4E2DC     [sub_5F4E2DC]
+  → UAENavigationSystem::SetVerboseNavDebugInfo %s
+
+Line   642377 @ 0x63A5DFC     [sub_63A5DFC]
+  → AudioDebugList
+
+Line  1523688 @ 0x7739FEC     [sub_7739FEC]
+  → higgs.DebugPlayerOfflineMove
+
+Line  2441430 @ 0xA176614     [sub_A176614]
+  → p.SetDebugFlag
+
+
+MONITORING & DETECTION
+--------------------------------------------------------------------------------
+Count: 4 messages
+
+Line   581154 @ 0x5E06BA4     [sub_5E06BA4]
+  → OnRep_ObservedItemList num = %d
+
+Line   601510 @ 0x60250D0     [sub_60250D0]
+  → UTimeWatchDogComponent::ClearTimeState: [%u][%d] %f %f
+
+Line  1281549 @ 0x70A1C10     [sub_70A1C10]
+  → [UDPPing] UUDPPingCollector::SetPingSystemControlFlag TakeEffectModule = %d, ThreadReportTlog = %d, PingEpo
+
+Line  1336419 @ 0x7250FBC     [sub_7250FBC]
+  → HDmpveConnectorObserver::OnConnected, Successed.
+
+
+REPORTING & LOGGING
+--------------------------------------------------------------------------------
+Count: 40 messages
+
+Line   412840 @ 0x52A878C     [sub_52A878C]
+  → LogAndroidEvents: EnqueueAppEvent : %u, %u, tid = %d
+
+Line   412909 @ 0x52A899C     [sub_52A899C]
+  → LogAndroidEvents: EnqueueAppEvent : %u, %u, tid = %d
+
+Line   416974 @ 0x52C5D10     [sub_52C5D10]
+  → UTCLOGTIMES
+
+Line   416981 @ 0x52C5D10     [sub_52C5D10]
+  → NOLOGTIMES
+
+Line   424415 @ 0x52D6104     [sub_52D6104]
+  → log.Category
+
+Line   424417 @ 0x52D6104     [sub_52D6104]
+  → Defines if the categoy is included in each line in the log file and in what form.\n
+
+Line   597639 @ 0x5FBF664     [sub_5FBF664]
+  → [GameReplay] HaveRecordingData[%s] IsInRecordState[%s]
+
+Line   598337 @ 0x5FDE8CC     [sub_5FDE8CC]
+  → UWonderfulPlayback::StopRecordingReplay this function should not be called
+
+Line  1245921 @ 0x6E420A4     [sub_6E420A4]
+  → \n==== Dump Key Logs Start ====
+
+Line  1273108 @ 0x6F17CD4     [sub_6F17CD4]
+  → -----UAReportEnable = %d
+
+Line  1273118 @ 0x6F17CD4     [sub_6F17CD4]
+  → -----AdjustReportEnable = %d
+
+Line  1277382 @ 0x7049C44     [sub_7049C44]
+  → UGameFrontendHUD::AfterLoadedEditorLogin OnAfterLoadedEditorLoginDelegate Broadcast
+
+Line  1280104 @ 0x70812D8     [sub_70812D8]
+  → intl::Compliance::SetLogConfig called  %d %d %d
+
+Line  1281934 @ 0x70A80C4     [sub_70A80C4]
+  → UScriptHelperClient::GEMReportLobbyCustomEvent GameFrontendHUD is null
+
+Line  1282839 @ 0x70B94C0     [sub_70B94C0]
+  → UScriptHelperClient::GameJoySetMomentRecordSwitchOn
+
+Line  1283015 @ 0x70B977C     [sub_70B977C]
+  → UScriptHelperClient::GameJoyStartManualRecord
+
+Line  1283042 @ 0x70B977C     [sub_70B977C]
+  → UScriptHelperClient::GameJoyStopManualRecord
+
+Line  1283800 @ 0x70CF3C4     [sub_70CF3C4]
+  → UScriptHelperClient::EnableReportVoiceSDKEvent InitVoiceSdkComponentReportEnable:%d VoiceSdkJoinRoomReportEnab
+
+Line  1284177 @ 0x70CFF58     [sub_70CFF58]
+  → UScriptHelperClient::CloudVersionPipe_Log F
+
+Line  1336064 @ 0x7249050     [sub_7249050]
+  → LogCharAnim
+
+... and 20 more messages
+
+
+SECURITY VALIDATION
+--------------------------------------------------------------------------------
+Count: 25 messages
+
+Line   424254 @ 0x52D6104     [sub_52D6104]
+  → Enable check android is has virtual input devcie connected\n
+
+Line   515301 @ 0x56CF310     [sub_56CF310]
+  → p.EnableDoubleCheckForProneSweep
+
+Line   515752 @ 0x56CF310     [sub_56CF310]
+  → CharacterCheckPassWall
+
+Line   524828 @ 0x57CFEAC     [sub_57CFEAC]
+  → ASTExtraBaseCharacter::CheckCanInterruptCurrentEmote by using PlayEmoteComponent
+
+Line   526784 @ 0x57F4C38     [sub_57F4C38]
+  → ASTExtraSimpleCharacter::CheckPlayerNeedUpdateAnimation MonsterAnimListComponent is null
+
+Line   550051 @ 0x5A5EEB4     [sub_5A5EEB4]
+  → UPlayerSecurityInfoCollector::GetRecordAIBotMap Error 2 [RecordType:%d][AIType:%d]
+
+Line   576845 @ 0x5D962A4     [sub_5D962A4]
+  → CheckQuitSpectatingInClientRestart_Implementation in c++, PlayerKey:%u
+
+Line   598410 @ 0x5FE6934     [sub_5FE6934]
+  → UWonderfulPlayback::CheckPlayerState EVENTID_INIT_REPLAYUI
+
+Line   601854 @ 0x60293B4     [sub_60293B4]
+  → [SecurityLog OnCharacterWeaponShootHit]
+
+Line   626534 @ 0x6284404     [sub_6284404]
+  → ASTExtraCapsuleVehicle: TryCheckSimulatePhysics: bInHouseSpawn = false 
+
+Line  1338727 @ 0x7277C60     [sub_7277C60]
+  → UIMSDKHelper::CheckIsRegisted
+
+Line  1338746 @ 0x7277C60     [sub_7277C60]
+  → UIMSDKHelper::CheckIsRegisted: return by imsdkManager is nullptr
+
+Line  1338968 @ 0x72782B8     [sub_72782B8]
+  → UIMSDKHelper::InvalidateQRCode: return by imsdkManager is nullptr
+
+Line  1523721 @ 0x7739FEC     [sub_7739FEC]
+  → LogSecurityDynamicActors
+
+Line  1523745 @ 0x7739FEC     [sub_7739FEC]
+  → LogSecurityTick
+
+Line  1523757 @ 0x7739FEC     [sub_7739FEC]
+  → SecurityTick.MaxCount
+
+Line  1675365 @ 0x7CC7A80     [sub_7CC7A80]
+  → UAESkillCondition_CheckModType
+
+Line  1852249 @ 0x8145A70     [sub_8145A70]
+  → Checking Full Timer
+
+Line  1930392 @ 0x834E104     [sub_834E104]
+  → r.AsyncPSO.EnableCheckBinaryCache
+
+Line  2363392 @ 0x9E14820     [sub_9E14820]
+  → FGotoTimeInSecondsTask::CheckpointReady: Failed to go to checkpoint.
+
+... and 5 more messages
+
+================================================================================
+                    4. JNI INTERFACE FUNCTIONS
+================================================================================
+
+Java Native Interface functions (called from Java/Kotlin game code):
+
+  1. Line   414216: Java_HasNotchInScreen1
+  2. Line   414225: Java_HasNotchInScreen3
+  3. Line   180250: Java_com_blue_studio_globalization_ue4_UploaderHelper_onUploadComplete
+  4. Line   207269: Java_com_centauri_oversea_api_CocosPayHelper_OnCentauriLoginExpired
+  5. Line   114280: Java_com_epicgames_ue4_GameActivity_nativeCallbackOnUiThread
+  6. Line       64: Java_com_epicgames_ue4_GameActivity_nativeOnActivityResult
+  7. Line       66: Java_com_epicgames_ue4_GameActivity_nativeOnDeviceRotationChanged
+  8. Line       67: Java_com_epicgames_ue4_GameActivity_nativeOnNewIntent
+  9. Line       65: Java_com_epicgames_ue4_GameActivity_nativeOnRequestPermissionsResult
+ 10. Line       68: Java_com_epicgames_ue4_GameActivity_nativeOnSubscribeToTopicSuccess
+ 11. Line       72: Java_com_epicgames_ue4_GameActivity_nativeResumeMainInit
+ 12. Line       45: Java_com_epicgames_ue4_GameActivity_nativeSetChipSet
+ 13. Line       61: Java_com_epicgames_ue4_GameActivity_nativeSetObbFilePaths
+ 14. Line       63: Java_com_epicgames_ue4_GameActivity_nativeSetSensorAvailability
+ 15. Line   115791: Java_com_epicgames_ue4_GameActivity_nativeSetSurfaceViewInfo
+ 16. Line       44: Java_com_epicgames_ue4_GameActivity_nativeVirtualKeyboardShown
+ 17. Line       35: Java_com_epicgames_ue4_GameActivity_nativeVirtualKeyboardVisible
+ 18. Line   209053: Java_com_helpshift_HelpshiftBridge_didReceiveNotificationCount
+ 19. Line   209054: Java_com_helpshift_HelpshiftBridge_helpshiftSessionBegan
+ 20. Line   209055: Java_com_helpshift_HelpshiftBridge_helpshiftSessionEnded
+
+================================================================================
+            5. BAN FIX STRATEGY RECOMMENDATIONS
+================================================================================
+
+CRITICAL FUNCTIONS TO PATCH FOR BAN FIXING:
+
+1. PLAYERSECURITYINFOCOLLECTOR FUNCTIONS (0x5A5EEB4 region)
+   Purpose: Collects security data about player behavior
+   Ban Impact: HIGH - Feeds data to anti-cheat system
+   Patch Strategy: NOP data collection or return early
+
+2. TIMEWATCHDOGCOMPONENT FUNCTIONS
+   Purpose: Monitors timing anomalies (speed hacks, etc.)
+   Ban Impact: MEDIUM-HIGH - Detects time manipulation
+   Patch Strategy: Disable time checks or increase thresholds
+
+3. WEAPONANTICHEATCOMP FUNCTIONS
+   Purpose: Validates weapon behavior and projectile physics
+   Ban Impact: MEDIUM - Catches weapon-related cheats
+   Patch Strategy: Bypass verification checks
+
+4. VACACCELERATION & VACTIMESPEED
+   Purpose: Vehicle anti-cheat (speed/acceleration limits)
+   Ban Impact: MEDIUM - Vehicle-specific detection
+   Patch Strategy: Remove velocity/acceleration checks
+
+5. SECURITYLOGWEAPONCOLLECTOR
+   Purpose: Logs weapon events for server-side analysis
+   Ban Impact: LOW-MEDIUM - Data collection only
+   Patch Strategy: Disable logging or sanitize data
+
+================================================================================
+            6. IMPLEMENTATION GUIDE & HEX PATCHES
+================================================================================
+
+GENERAL PATCHING APPROACH:
+
+Method 1: Binary Patching (Static)
+----------------------------------------
+1. Extract libUE4.so from APK (lib/arm64-v8a/)
+2. Backup original file
+3. Use hex editor (HxD, 010 Editor) to patch offsets
+4. Common patches:
+   - NOP instruction: 1F 20 03 D5 (ARM64)
+   - Early return: C0 03 5F D6 (RET)
+   - Force true: 20 00 80 D2 (MOV X0, #1)
+   - Force false: 00 00 80 D2 (MOV X0, #0)
+5. Repack APK and sign
+
+Method 2: Frida Hooking (Dynamic)
+----------------------------------------
+1. Root device with Magisk
+2. Install Frida server
+3. Hook functions at runtime:
+
+   // Example Frida script
+   var base = Module.findBaseAddress('libUE4.so');
+   var securityFunc = base.add(0x5A5EEB4);
+   Interceptor.replace(securityFunc, new NativeCallback(
+     function() { return 0; }, 'int', []
+   ));
+
+Method 3: Il2CppInspector / Memory Editing
+----------------------------------------
+1. Use Game Guardian or similar
+2. Search for function addresses in memory
+3. Modify return values or branch conditions
+4. Freeze values to persist changes
+
+================================================================================
+                    ANALYSIS SUMMARY STATISTICS
+================================================================================
+
+Total Security Functions Analyzed: 708
+Total Security Messages Found: 94
+Source File References: 9
+JNI Functions: 20
+
+Category Breakdown:
+  - Anti-Cheat Functions: 14 functions
+  - Ban Detection & Enforcement: 26 functions
+  - GM/Admin Tools: 10 functions
+  - Monitoring & Detection: 503 functions
+  - Reporting & Logging: 137 functions
+  - Security Validation: 18 functions
+
+================================================================================
+                         END OF REPORT
+================================================================================
+
+For more information:
+  - See other library analyses in this repository
+  - Refer to BAN_FIX_OFFSETS.md for general strategies
+  - Check LIBANOGS_IMPLEMENTATION_GUIDE.md for detailed techniques
+
+DISCLAIMER: This analysis is provided for educational purposes only.
+The authors are not responsible for any misuse of this information.
+
+Report generated: 2025-11-18
+Analysis tool: LibUE4 Comprehensive Analyzer v2.0

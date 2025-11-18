@@ -32,19 +32,27 @@ This repository contains a comprehensive analysis of BGMI (Battlegrounds Mobile 
 
 ### Game Libraries (ARM64 Architecture)
 
-1. **libAntsVoice.so** (4.0 MB)
+1. **libUE4.so** (99 MB decompiled) ⭐ **NEW**
+   - Unreal Engine 4 core library
+   - 220,234+ functions, 708 security functions
+   - Player security data collection
+   - Time-based cheat detection
+   - Weapon & vehicle anti-cheat
+   - Central security coordination
+
+2. **libAntsVoice.so** (4.0 MB)
    - Voice communication library
    - Player authentication system
    - Reporting mechanism
    - Token validation
    
-2. **libTBlueData.so** (3.8 MB)
+3. **libTBlueData.so** (3.8 MB)
    - Tencent security framework
    - SSL/TLS certificate management
    - Data encryption and integrity
    - Anti-tampering protection
    
-3. **libanogs.so** (5.4 MB)
+4. **libanogs.so** (5.4 MB)
    - Primary anti-cheat engine
    - Ban enforcement logic
    - Memory protection
@@ -56,7 +64,10 @@ This repository contains a comprehensive analysis of BGMI (Battlegrounds Mobile 
 - **[SPECIFIC_BAN_FIXES_1DAY_10YEAR_FLAGS.txt](SPECIFIC_BAN_FIXES_1DAY_10YEAR_FLAGS.txt)** - ⭐ **NEW** Step-by-step fixes for 1-day and 10-year bans (offline/online methods)
 - **[BAN_FIX_OFFSETS.md](BAN_FIX_OFFSETS.md)** - General overview and strategies
 
-#### Complete Library Analysis (238KB)
+#### Complete Library Analysis (300KB+)
+- **[LIBUE4_IMPLEMENTATION_GUIDE.md](LIBUE4_IMPLEMENTATION_GUIDE.md)** - ⭐ **NEW** LibUE4.so complete implementation guide with Frida scripts
+- **[LIBUE4_ALL_OFFSETS_DETAILED.txt](LIBUE4_ALL_OFFSETS_DETAILED.txt)** - ⭐ **NEW** All 708 security offsets with detailed descriptions
+- **[libUE4_COMPLETE_BAN_FIX_ANALYSIS.txt](libUE4_COMPLETE_BAN_FIX_ANALYSIS.txt)** - ⭐ **NEW** UE4 engine security analysis (220K+ functions)
 - **[LIBANOGS_FULL_OFFSETS_DETAILED.txt](LIBANOGS_FULL_OFFSETS_DETAILED.txt)** - ⭐ **NEW** Complete offset database with exact addresses (1,219 lines, all 20 AnoSDK functions)
 - **[LIBANOGS_IMPLEMENTATION_GUIDE.md](LIBANOGS_IMPLEMENTATION_GUIDE.md)** - ⭐ **NEW** Step-by-step implementation guide with Frida scripts and hex patches
 - **[ALL_BAN_FIX_OFFSETS_LIBANOGS_LIBTBLUEDATA.txt](ALL_BAN_FIX_OFFSETS_LIBANOGS_LIBTBLUEDATA.txt)** - ⭐ Complete offset database (50+ offsets)
@@ -76,6 +87,10 @@ This repository contains a comprehensive analysis of BGMI (Battlegrounds Mobile 
 
 | Library | Function | Offset | Purpose | Ban Impact |
 |---------|----------|--------|---------|------------|
+| libUE4.so | PlayerSecurityInfoCollector | 0x5A5EEB4 | Security data collection | Critical |
+| libUE4.so | WeaponAntiCheatComp::Verify | 0x6614EA4 | Projectile verification | High |
+| libUE4.so | VacAcceleration | 0x6272568 | Vehicle speed check | Medium |
+| libUE4.so | TimeWatchDogComponent | ~Line 601510 | Timing validation | High |
 | libAntsVoice.so | AntsVoice_ApplyMessageKey | 0x8A850 | Authentication | Critical |
 | libAntsVoice.so | AntsVoice_JoinTeamRoom | 0x8A0B4 | Room join | Critical |
 | libAntsVoice.so | AntsVoice_ReportPlayer | 0x8B990 | Player reporting | High |
@@ -132,6 +147,7 @@ Protection: Stripped symbols (limited)
 
 ### Function Export Analysis
 ```
+libUE4.so: 220,234+ total functions (708 security-related)
 libAntsVoice.so: 552 exported functions
 libTBlueData.so: Limited exports (security library)
 libanogs.so: 237 exported functions
@@ -350,6 +366,13 @@ This research is NOT intended to:
 - ❌ Enable malicious activity
 
 ## 📝 Changelog
+
+### Version 2.0.0 (2025-11-18) ⭐ **NEW**
+- Added complete libUE4.so analysis (Unreal Engine 4 core)
+- 708 security functions identified and documented
+- Complete implementation guide with Frida scripts
+- Detailed offset database with patch strategies
+- Total functions analyzed: 221,000+
 
 ### Version 1.0.0 (2025-11-18)
 - Initial release
